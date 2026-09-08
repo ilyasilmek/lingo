@@ -6,7 +6,7 @@ Tamamen Türkçe, mobil ve masaüstü tarayıcılarda çalışan bir kelime oyun
 
 ## Özellikler
 
-- **38.910 kelime**, 4–10 harf seçenekleri.
+- **44.056 kelime**, 4–10 harf seçenekleri.
 - Her kelime için altı tahmin.
 - Doğru yerdeki harfler yeşil, farklı yerdeki harfler turuncu.
 - Tekrarlanan harfleri kelimedeki adetlerine göre değerlendirme.
@@ -53,7 +53,7 @@ Havuz sonludur; seçilen uzunluktaki havuz bittiğinde tekrar karıştırılır.
 
 ## Oyun sonunda kelime anlamı
 
-Kazanıldığında, altı tahmin bittiğinde veya süre dolduğunda doğru kelimenin en fazla üç sözlük anlamı gösterilir. 38.457 anlamı bulunan kelime hedef olarak seçilir; 38.910 kelimenin tamamı tahminlerde kabul edilir. Yeni oyunda eski anlam kartı kapanır. Bağlantı hatasında tekrar deneme sunulur. Anlamlar aynı sitedeki `meanings/4.json`–`meanings/10.json` dosyalarından yüklenir; harici API gerekmez. Yerel kullanımda anlam dosyaları için yukarıdaki HTTP sunucusunu kullanın.
+Kazanıldığında, altı tahmin bittiğinde veya süre dolduğunda doğru kelimenin en fazla üç sözlük anlamı gösterilir. 43.603 anlamı bulunan kelime hedef olarak seçilir; 44.056 kelimenin tamamı tahminlerde kabul edilir. Yeni oyunda eski anlam kartı kapanır. Bağlantı hatasında tekrar deneme sunulur. Anlamlar aynı sitedeki `meanings/4.json`–`meanings/10.json` dosyalarından yüklenir; harici API gerekmez. Yerel kullanımda anlam dosyaları için yukarıdaki HTTP sunucusunu kullanın.
 
 Anlam verisi: [Bilal Özdemir / tr-word-list](https://github.com/bilalozdemir/tr-word-list), `files/words.json`, TDK sözlük derlemesi. Kaynakta belirtilen [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) lisansı kapsamında, türetilmiş `meanings/*.json` verileri de aynı lisansla sunulur. Yapılan değişiklikler: oyun kelimelerine filtreleme, Türkçe büyük harf ve şapkalı harf normalleştirmesi, yinelenen anlamları birleştirme, ilk üç anlamı koruma ve uzunluğa göre bölme. Bu derleme resmî bir TDK ürünü değildir.
 
@@ -66,3 +66,5 @@ Oyundaki **Uygulamayı yükle** düğmesini kullanın. Destekleyen tarayıcılar
 `manifest.webmanifest` uygulama kimliğini, bağımsız pencere görünümünü ve gömülü PNG simgelerini tanımlar. `sw.js` yalnızca bu uygulamanın kapsamındaki dosyaları önbelleğe alır; aynı GitHub hesabındaki diğer uygulamaların önbelleklerini silmez. Service worker HTTPS (GitHub Pages) veya localhost üzerinde çalışır. Dosyayı çift tıklayarak açmak PWA kurulumunu etkinleştirmez.
 
 **Güncellemeler:** Oyun dosyaları değiştiğinde `sw.js` içindeki `VERSION` değerini artırın. Tam yeni dosya grubu indirilemezse eski çalışan sürüm korunur. İndirilen güncelleme açık oyun pencereleri kapatıldıktan sonra devreye girer; devam eden oyunu zorla yenilemez.
+
+Kelime havuzu genişletmesi: TDK derlemesindeki 4–10 harfli, Türkçe alfabeye uygun ve anlamı bulunan ek sözcükler mevcut havuzla birleştirildi; özel adlarla çok sözcüklü ifadeler elendi.
