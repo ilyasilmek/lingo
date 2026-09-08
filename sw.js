@@ -1,7 +1,7 @@
 'use strict';
 // Change VERSION whenever an application asset changes. Updates activate after
 // existing Lingo tabs close, so a live game never mixes different versions.
-const VERSION='pwa-1';
+const VERSION='pwa-2';
 const PREFIX=`lingo:${self.registration.scope}:`;
 const CACHE=PREFIX+VERSION;
 const ASSETS=['./','./index.html','./style.css','./words.js','./app.js','./pwa.js','./manifest.webmanifest',...Array.from({length:7},(_,i)=>`./meanings/${i+4}.json`)];
