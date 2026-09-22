@@ -6,7 +6,7 @@
 
 Türkçe Lingo’nun Android sürümü: mobil tasarım, 44.056 kelime, çevrimdışı anlamlar ve animasyonlu oyun.
 
-<p align="center"><img src="docs/screenshots/home-dark.png" width="220" alt="Lingo koyu tema" /> <img src="docs/screenshots/game.png" width="220" alt="Türkçe Lingo oyun ekranı" /> <img src="docs/screenshots/home-light.png" width="220" alt="Lingo açık tema" /></p>
+<p align="center"><img src="docs/screenshots/splash.png" width="220" alt="Lingo animasyonlu açılış ekranı" /> <img src="docs/screenshots/home-dark.png" width="220" alt="Lingo koyu tema" /> <img src="docs/screenshots/game.png" width="220" alt="Türkçe Lingo oyun ekranı" /> <img src="docs/screenshots/home-light.png" width="220" alt="Lingo açık tema" /></p>
 
 [Android paketlerini indir](https://github.com/ilyasilmek/lingo/releases) · [Mobil arayüzü aç](https://ilyasilmek.github.io/lingo/mobile/) · [Derleme ve imzalama](docs/ANDROID.md)
 
