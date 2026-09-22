@@ -1,10 +1,10 @@
 'use strict';
 // Change VERSION whenever an application asset changes. Updates activate after
 // existing Lingo tabs close, so a live game never mixes different versions.
-const VERSION='pwa-2';
+const VERSION='pwa-3-mobile';
 const PREFIX=`lingo:${self.registration.scope}:`;
 const CACHE=PREFIX+VERSION;
-const ASSETS=['./','./index.html','./style.css','./words.js','./app.js','./pwa.js','./manifest.webmanifest',...Array.from({length:7},(_,i)=>`./meanings/${i+4}.json`)];
+const ASSETS=['./','./index.html','./style.css','./words.js','./app.js','./pwa.js','./manifest.webmanifest','./mobile/index.html','./mobile/style.css','./mobile/app.js','./mobile/engine.js','./mobile/icon.svg',...Array.from({length:7},(_,i)=>`./meanings/${i+4}.json`)];
 const urls=ASSETS.map(path=>new URL(path,self.registration.scope).href);
 self.addEventListener('install',event=>{
  event.waitUntil((async()=>{
@@ -23,7 +23,10 @@ self.addEventListener('fetch',event=>{
  const request=event.request,url=new URL(request.url);
  if(request.method!=='GET'||url.origin!==self.location.origin||!url.href.startsWith(self.registration.scope))return;
  const canonical=new URL(url);canonical.search='';canonical.hash='';
- const key=request.mode==='navigate'?new URL('./index.html',self.registration.scope).href:canonical.href;
+ const root=new URL('./',self.registration.scope).href;
+ if(canonical.href===root)canonical.pathname+='index.html';
+ else if(canonical.href===new URL('./mobile/',self.registration.scope).href)canonical.pathname+='index.html';
+ const key=canonical.href;
  if(!urls.includes(key))return;
  event.respondWith((async()=>{
   const cache=await caches.open(CACHE),cached=await cache.match(key);
