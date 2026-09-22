@@ -11,12 +11,13 @@
   let round = read('round', null), daily = read('daily', {}), length = 5, mode = 'classic', screen = 'home', loading = false, busy = false, animation = null, toastTimer, audio;
   if (round && (!words.has(round.target) || !Array.isArray(round.guesses) || round.guesses.length > 6)) round = null;
   const fmt = number => number.toLocaleString('tr-TR');
+  const motionAllowed = () => !prefs.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   function persist() { save('round', round); save('stats', stats); save('daily', daily); }
   function applyPrefs() {
     document.documentElement.dataset.theme = prefs.light ? 'light' : 'dark';
     document.documentElement.classList.toggle('high-contrast', prefs.contrast);
     document.documentElement.classList.toggle('reduce-motion', prefs.motion);
-    document.querySelector('meta[name="theme-color"]').content = prefs.light ? '#f7f6fa' : '#15141b';
+    document.querySelector('meta[name="theme-color"]').content = prefs.light ? '#f5f3ff' : '#11132b';
     for (const [id, key] of [['lightTheme','light'], ['soundSetting','sound'], ['hapticSetting','haptic'], ['contrastSetting','contrast'], ['motionSetting','motion']]) $(id).checked = prefs[key];
     save('prefs', prefs);
   }
@@ -44,6 +45,7 @@
   function resumeClock() { if (round && !round.done && round.mode === 'timed' && !round.deadline && !document.hidden && !$('dialog').open && screen === 'game') round.deadline = Date.now() + round.remaining; }
   function navigate(next) {
     if (next !== 'game') pause();
+    document.body.dataset.screen = next;
     screen = next;
     for (const id of ['home','game','statistics','settings']) $(id).hidden = id !== next;
     $('navigation').hidden = next === 'game';
@@ -122,12 +124,13 @@
     if (prefs.haptic && navigator.vibrate) navigator.vibrate([20,25,20]);
   }
   function type(key) {
-    if (!round || round.done || busy || screen !== 'game' || $('dialog').open) return;
+    if (!round || round.done || busy || screen !== 'game' || $('dialog').open || !$('splash').hidden) return;
     if (round.deadline && Date.now() >= round.deadline) { finish(false); return; }
     if (key === 'Enter') { submit(); return; }
     if (key === 'Backspace') round.input = round.input.slice(0, Math.max(1,round.input.length-1));
     else { key = Lingo.normalize(key); if (!/^[ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ]$/.test(key) || round.input.length >= round.n) return; round.input += key; }
     persist(); renderGame();
+    if (key !== 'Backspace' && motionAllowed()) $('board').querySelector('.row.active')?.children[round.input.length - 1]?.classList.add('typed');
   }
   function submit() {
     if (round.input.length !== round.n) { shake(`${round.n} harfli bir kelime yazmalısın.`); return; }
@@ -152,10 +155,12 @@
     stats.history.unshift({word:round.target,won,attempts:round.guesses.length}); stats.history = stats.history.slice(0,12);
     if (round.mode === 'daily') daily[round.day] = structuredClone(round);
     persist(); updateHome();
-    if (!abandoned) { renderGame(); notify(won ? 'İşte bu! Bir küçük zafer daha.' : 'Her kelime yeni bir keşif.'); if (won) { feedback(true); celebrate(); } }
+    if (!abandoned) { renderGame(); notify(won ? 'İşte bu! Bir küçük zafer daha.' : 'Her kelime yeni bir keşif.'); if (won) { feedback(true); celebrate(); if (motionAllowed()) { const row = $('board').children[round.guesses.length - 1]; row?.classList.add('winner'); [...(row?.children || [])].forEach((tile,i) => tile.style.setProperty('--delay', `${i*85}ms`)); } } }
   }
   async function showResult() {
     const active = round;
+    $('result').classList.toggle('won', active.won);
+    $('resultMedal').textContent = active.won ? '✦' : '✧';
     $('resultLabel').textContent = active.won ? 'KELİMEYİ BULDUN ✦' : 'BU KEZ KELİME';
     $('answer').textContent = active.target.toLocaleLowerCase('tr-TR');
     $('earned').textContent = active.won ? `+${active.points} puan · ${active.guesses.length}. tahminde buldun` : 'Bir kelime öğrendin. Bir sonrakinde görüşürüz.';
@@ -175,7 +180,7 @@
   function celebrate() {
     if (prefs.motion || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     $('confetti').replaceChildren();
-    for (let i=0;i<35;i++) { const piece = document.createElement('i'); piece.style.left = `${Math.random()*100}%`; piece.style.animationDelay = `${Math.random()*.5}s`; piece.style.background = ['#c6b6ef','#d4f77d','#f2b878'][i%3]; $('confetti').append(piece); }
+    for (let i=0;i<35;i++) { const piece = document.createElement('i'); piece.style.left = `${Math.random()*100}%`; piece.style.animationDelay = `${Math.random()*.5}s`; piece.style.background = ['#a78bfa','#79f2ce','#ff9b8a','#ffe28a'][i%4]; $('confetti').append(piece); }
     setTimeout(() => $('confetti').replaceChildren(),2700);
   }
   function renderStats() {
@@ -211,7 +216,7 @@
   document.addEventListener('keydown',e=>{if(e.ctrlKey||e.altKey||e.metaKey||$('dialog').open||screen!=='game')return;if(e.key==='Enter'&&document.activeElement.tagName==='BUTTON')return;if(e.key==='Enter'||e.key==='Backspace'||/^[a-zA-ZçğıöşüÇĞİÖŞÜ]$/.test(e.key)){e.preventDefault();type(e.key);}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else resumeClock();});
   window.addEventListener('pagehide',pause);
-  window.LingoNativeBack=()=>{if($('dialog').open){closeModal();return true;}if(screen!=='home'){navigate('home');return true;}return false;};
+  window.LingoNativeBack=()=>{if(!$('splash').hidden){dismissSplash();return true;}if($('dialog').open){closeModal();return true;}if(screen!=='home'){navigate('home');return true;}return false;};
   setInterval(()=>{
     if(!round||round.done||busy||round.mode!=='timed'||screen!=='game'||!round.deadline)return;
     round.remaining=Math.max(0,round.deadline-Date.now());$('gameHint').textContent=`${Math.ceil(round.remaining/1000)} sn`;$('timeFill').style.width=`${round.remaining/300}%`;
@@ -220,5 +225,39 @@
   // Recover a process kill during tile reveal without dropping or counting a guess twice.
   if(round&&!round.done&&round.guesses.length){const last=round.guesses.at(-1);if(last.word===round.target||round.guesses.length===6)finish(last.word===round.target,true);}
   if(round)round.deadline=null;
-  applyPrefs(); updateHome(); navigate('home');
+  let splashTimer, splashExitTimer;
+  function dismissSplash() {
+    clearTimeout(splashTimer); clearTimeout(splashExitTimer);
+    const splash = $('splash');
+    if (splash.hidden) return;
+    splash.classList.add('leaving');
+    const complete = () => {
+      splash.hidden = true;
+      document.querySelector('.app').inert = false;
+      document.body.classList.remove('splash-open');
+      $('play').focus({preventScroll:true});
+    };
+    if (motionAllowed()) splashExitTimer = setTimeout(complete, 280);
+    else complete();
+  }
+  function showSplash() {
+    if (!motionAllowed()) return;
+    try {
+      if (sessionStorage.getItem('lingo-intro-seen')) return;
+      sessionStorage.setItem('lingo-intro-seen', '1');
+    } catch { /* A blocked session store must never prevent launch. */ }
+    $('splash').hidden = false;
+    document.querySelector('.app').inert = true;
+    document.body.classList.add('splash-open');
+    $('skipSplash').focus({preventScroll:true});
+    splashTimer = setTimeout(dismissSplash, 1850);
+  }
+  $('skipSplash').onclick = dismissSplash;
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !$('splash').hidden) { event.preventDefault(); dismissSplash(); }
+  });
+  matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', event => {
+    if (event.matches) dismissSplash();
+  });
+  applyPrefs(); updateHome(); navigate('home'); showSplash();
 })();

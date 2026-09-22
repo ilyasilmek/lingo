@@ -1,10 +1,11 @@
-Türkçe Lingo artık Android'de.
+# Lingo 1.54.01
 
-- Mobil ekranlara özel arayüz, açık/koyu tema ve harf animasyonları.
-- 4–10 harf, 6 tahmin, klasik / süreli / günün kelimesi.
-- 44.056 kelime ve oyun sonunda çevrimdışı sözlük anlamları.
-- İstatistikler, tekrar etmeyen kelime havuzu ve yarım kalan oyuna devam.
-- Türkçe klavye, yüksek kontrast modu, azaltılmış hareket, isteğe bağlı ses.
+- Yeni mor, turkuaz ve mercan renk paleti; daha canlı açık/koyu temalar.
+- Otomatik kapanan, atlanabilir animasyonlu açılış ekranı.
+- Hareketli ana sayfa harfleri, kart geçişleri, dokunma tepkileri ve parlayan butonlar.
+- Harf girişinde sıçrama, kazanılan satırda dalga ve renkli kutlama efektleri.
+- Hareket azaltma tercihi açıkken animasyonlar ve açılış beklemesi kaldırılır.
+- Paket adı: `com.stitchilyas.lingo`. Android sürüm adı: `1.54.01`.
 
 **İndirme:** `debug.apk` telefona kurulabilir test sürümüdür. `unsigned.aab` derlenmiş release paketidir; Google Play için kendi yükleme anahtarınızla imzalamanız gerekir. Depoda imzalama sırları varsa `release.apk` ve `signed.aab` de üretilir. Ayrıntılar: BUILD-NOTES.md.
 

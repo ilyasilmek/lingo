@@ -1,10 +1,10 @@
 'use strict';
 // Change VERSION whenever an application asset changes. Updates activate after
 // existing Lingo tabs close, so a live game never mixes different versions.
-const VERSION='pwa-3-mobile';
+const VERSION='pwa-1.54.01';
 const PREFIX=`lingo:${self.registration.scope}:`;
 const CACHE=PREFIX+VERSION;
-const ASSETS=['./','./index.html','./style.css','./words.js','./app.js','./pwa.js','./manifest.webmanifest','./mobile/index.html','./mobile/style.css','./mobile/app.js','./mobile/engine.js','./mobile/icon.svg',...Array.from({length:7},(_,i)=>`./meanings/${i+4}.json`)];
+const ASSETS=['./','./index.html','./style.css','./words.js','./app.js','./pwa.js','./manifest.webmanifest','./mobile/index.html','./mobile/style.css','./mobile/lively.css','./mobile/app.js','./mobile/engine.js','./mobile/icon.svg',...Array.from({length:7},(_,i)=>`./meanings/${i+4}.json`)];
 const urls=ASSETS.map(path=>new URL(path,self.registration.scope).href);
 self.addEventListener('install',event=>{
  event.waitUntil((async()=>{

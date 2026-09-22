@@ -26,9 +26,9 @@ public final class MainActivity extends ComponentActivity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         FrameLayout frame = new FrameLayout(this);
-        frame.setBackgroundColor(Color.rgb(21, 20, 27));
+        frame.setBackgroundColor(Color.rgb(17, 19, 43));
         webView = new WebView(this);
-        webView.setBackgroundColor(Color.rgb(21, 20, 27));
+        webView.setBackgroundColor(Color.rgb(17, 19, 43));
         frame.addView(webView, new FrameLayout.LayoutParams(-1, -1));
         frame.setOnApplyWindowInsetsListener((view, insets) -> {
             view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),

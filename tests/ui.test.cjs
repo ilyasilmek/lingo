@@ -26,6 +26,21 @@ async function send(page, word) {
     browser=await chromium.launch({headless:true,args:['--no-sandbox']});
     const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true});
     const page=await context.newPage(),errors=[]; page.on('pageerror',e=>errors.push(e.message));
+    // Opening must be skippable, not repeat on reload, and respect reduced motion.
+    await page.goto(base);
+    await page.locator('#splash').waitFor({state:'visible'});
+    await page.screenshot({path:path.join(output,'splash.png'),animations:'disabled'});
+    await page.locator('#skipSplash').click();
+    await page.locator('#splash').waitFor({state:'hidden'});
+    assert.equal(await page.locator('.app').evaluate(el=>el.inert),false);
+    await page.reload();assert.equal(await page.locator('#splash').isVisible(),false);
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.evaluate(()=>sessionStorage.clear());await page.reload();
+    assert.equal(await page.locator('#splash').isVisible(),false);
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    await page.evaluate(()=>sessionStorage.clear());await page.reload();
+    await page.locator('#splash').waitFor({state:'hidden',timeout:4000});
+    assert.equal(await page.locator('.app').evaluate(el=>el.inert),false);
     await seed(page);
     await page.screenshot({path:path.join(output,'home-dark.png'),fullPage:true});
     // Complete a deterministic game, verify dictionary and exact-once scoring after reload.
@@ -98,6 +113,19 @@ async function send(page, word) {
     await seed(page,{round:{target:'KALEM',n:5,mode:'classic',day:'2026-09-22',guesses:[{word:'KALEM',result:Array(5).fill('correct')}],input:'K',done:false,won:false,remaining:30000,deadline:null}});
     assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('lingo-mobile-stats')).wins),1);
     await page.reload();assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('lingo-mobile-stats')).wins),1);
+    // Real motion path: key pop, reveal lock and winning state still complete.
+    await seed(page,{prefs:{motion:false},round:{target:'KALEM',n:5,mode:'classic',day:'2026-09-22',guesses:[],input:'K',done:false,won:false,remaining:30000,deadline:null}});
+    await page.locator('#resume').click();await page.locator('[data-key="A"]').click();
+    assert.equal(await page.locator('.tile.typed').count(),1);
+    for(const ch of 'LEM')await page.locator(`[data-key="${ch}"]`).click();
+    await page.locator('[data-key="Enter"]').click();
+    assert.equal(await page.locator('[data-key="A"]').isDisabled(),true);
+    await page.locator('#result').waitFor({state:'visible'});
+    assert.equal(await page.locator('.row.winner').count(),1);
+    assert.equal(await page.locator('#result').getAttribute('class'),'result-card won');
+    await page.locator('[data-action="home"]').first().click();
+    await page.locator('[data-screen="settings"]').click();
+    assert.match(await page.locator('.about small').textContent(),/1\.54\.01/);
     assert.deepEqual(errors,[]);
     console.log('PASS: mobile sizes, all representative lengths, Turkish input, scoring, persistence, dictionary errors, timing, daily result, process recovery, themes.');
   } finally {if(browser)await browser.close();server.kill();}
