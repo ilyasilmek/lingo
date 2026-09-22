@@ -1,4 +1,4 @@
-package com.ilyasilmek.lingo;
+package com.stitchilyas.lingo;
 
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;

@@ -1,6 +1,6 @@
 # Lingo Android
 
-Android 8.0 ve üzeri için Türkçe, çevrimdışı Lingo. Uygulama kimliği `com.ilyasilmek.lingo`; test sürümü `com.ilyasilmek.lingo.debug`.
+Android 8.0 ve üzeri için Türkçe, çevrimdışı Lingo. Uygulama kimliği `com.stitchilyas.lingo`; test sürümü `com.stitchilyas.lingo.debug`.
 
 ## Paketler
 

@@ -2,11 +2,11 @@ plugins { id 'com.android.application' }
 
 def signingAvailable = System.getenv('ANDROID_KEYSTORE_PATH') != null
 android {
-    namespace 'com.ilyasilmek.lingo'
+    namespace 'com.stitchilyas.lingo'
     compileSdk 36
     buildFeatures { buildConfig true }
     defaultConfig {
-        applicationId 'com.ilyasilmek.lingo'
+        applicationId 'com.stitchilyas.lingo'
         minSdk 26
         targetSdk 36
         versionCode = Integer.parseInt(System.getenv('ANDROID_VERSION_CODE') ?: '1')
