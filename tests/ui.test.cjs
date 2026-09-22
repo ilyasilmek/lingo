@@ -66,6 +66,7 @@ async function send(page, word) {
         await seed(page);await page.locator(`#lengths button[aria-label="${n} harf"]`).click();await page.locator('#play').click();
         await page.locator('#game').waitFor({state:'visible'});
         assert.equal(await page.locator('.tile').count(),6*n);
+        assert.equal(await page.evaluate(()=>document.querySelector('[data-key="Enter"]').getBoundingClientRect().bottom <= innerHeight),true,`Keyboard clipped at ${width}px / ${n}`);
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true,`Overflow at ${width}px / ${n}`);
         await page.locator('[data-key="A"]').click();
         const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('lingo-mobile-round')));
