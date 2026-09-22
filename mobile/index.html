@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#15141b">
+  <meta name="description" content="Lingo: Türkçe kelime oyunu. İlk harf bizden, gerisi senden.">
+  <title>Lingo · Bir kelime daha</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="../words.js"></script>
+  <script defer src="engine.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="brand" data-action="home" aria-label="Lingo ana sayfa"><span class="brand-icon">l<span>•</span></span>lingo<span class="brand-dot">.</span></button>
+      <div class="top-actions"><span class="streak-pill"><span aria-hidden="true">ϟ</span> <b id="headerStreak">0</b> seri</span><button class="icon-button" data-action="help" aria-label="Nasıl oynanır?">?</button></div>
+    </header>
+
+    <main id="home" class="screen">
+      <div class="greeting"><span class="eyebrow">KELİMELERİN DÜNYASINA HOŞ GELDİN</span><h1>Bir kelime.<br><span>Bir küçük zafer.</span></h1><p>İlk harf bizden, gerisi senden.</p></div>
+      <div class="hero-tiles" aria-hidden="true"><span class="correct">L</span><span class="correct">İ</span><span class="present">N</span><span>G</span><span class="correct">O</span><i class="spark s1">✳</i><i class="spark s2">✧</i></div>
+      <button id="resume" class="resume" hidden>Yarım kalan oyununa devam et <span>↗</span></button>
+      <section class="play-card"><div class="card-heading"><span class="eyebrow">KENDİ RİTMİNİ BUL</span><span class="small-badge">6 TAHMİN</span></div><h2>Kaç harfle oynayalım?</h2><div id="lengths" class="lengths" role="group" aria-label="Kelime uzunluğu"></div><div class="mode-switch" role="group" aria-label="Oyun modu"><button id="classic" class="selected" data-mode="classic" aria-pressed="true">◈ Klasik</button><button id="timed" data-mode="timed" aria-pressed="false">ϟ Süreli</button></div><p id="modeDescription" class="mode-description">Acele yok. Düşün, keşfet, kelimeyi bul.</p><button id="play" class="primary">Hadi oynayalım <span>↗</span></button><p class="pool-note"><span class="status-dot"></span> <span id="poolCount">44.056 kelime · 4–10 harf</span></p></section>
+      <button id="daily" class="daily-card"><div class="daily-symbol">✳</div><div><span class="eyebrow">HER GÜN YENİ BİR MEYDAN OKUMA</span><h3>Günün kelimesi</h3><p id="dailyStatus">Herkes için aynı kelime. Sıra sende.</p></div><span class="daily-arrow">↗</span></button>
+      <div class="mini-stats"><div><strong id="homeWins">0</strong><span>kelime bulundu</span></div><div><strong id="homeScore">0</strong><span>toplam puan</span></div><div><strong id="homeBest">0</strong><span>en iyi seri</span></div></div>
+      <p class="home-foot">Biraz merak. Biraz sezgi. Bolca Türkçe.</p>
+    </main>
+
+    <main id="game" class="screen game-screen" hidden>
+      <div class="game-heading"><button class="icon-button" data-action="home" aria-label="Oyunu kaydet ve ana sayfaya dön">‹</button><div><span class="eyebrow" id="gameMode">KLASİK</span><h2 id="gameTitle">5 harf, bir kelime.</h2></div><button class="icon-button" data-action="help" aria-label="Oyun kuralları">?</button></div>
+      <div class="round-info"><span id="attempt">1 / 6 TAHMİN</span><span id="gameHint">İlk harf bizden</span></div>
+      <div id="timeTrack" class="time-track" hidden><div id="timeFill"></div></div>
+      <div id="board" class="board" role="group" aria-label="Tahmin tahtası"></div>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+      <div class="legend"><span><i class="correct"></i>Doğru yer</span><span><i class="present"></i>Başka yer</span><span><i class="absent"></i>Yok</span></div>
+      <div id="keyboard" class="keyboard" aria-label="Türkçe klavye"></div>
+      <section id="result" class="result-card" hidden aria-live="polite"><span class="eyebrow" id="resultLabel"></span><h2 id="answer"></h2><p id="earned"></p><ol id="definitions"></ol><p class="source-note">TDK sözlük derlemesi · CC BY-SA 4.0</p><div class="result-actions"><button id="share" class="secondary">Sonucunu paylaş</button><button id="next" class="primary">Bir kelime daha ↗</button></div></section>
+    </main>
+
+    <main id="statistics" class="screen" hidden><div class="page-heading"><span class="eyebrow">HER KELİME BİR ADIM</span><h1>Senin hikâyen.</h1><p>Burada bütün küçük zaferlerin birikiyor.</p></div><div id="statCards" class="stat-cards"></div><section class="panel"><h2>Tahmin dağılımı</h2><p>Doğru kelimeyi kaçıncı denemede buldun?</p><div id="distribution" class="distribution"></div></section><section class="panel"><h2>Son keşiflerin</h2><div id="history"></div></section></main>
+
+    <main id="settings" class="screen" hidden><div class="page-heading"><span class="eyebrow">TAM SANA GÖRE</span><h1>Oyunun ritmi.</h1><p>Küçük dokunuşlar, daha güzel bir oyun.</p></div><section class="panel settings-panel"><label><span><b>Açık tema</b><small>Aydınlık bir görünüm</small></span><input id="lightTheme" type="checkbox" role="switch"></label><label><span><b>Oyun sesleri</b><small>Tahmin ve zafer sesleri</small></span><input id="soundSetting" type="checkbox" role="switch"></label><label><span><b>Titreşim</b><small>Destekleyen cihazlarda dokunma tepkisi</small></span><input id="hapticSetting" type="checkbox" role="switch"></label><label><span><b>Yüksek kontrastlı renkler</b><small>Mavi ve turuncu harf ipuçları</small></span><input id="contrastSetting" type="checkbox" role="switch"></label><label><span><b>Hareketi azalt</b><small>Daha sakin geçişler</small></span><input id="motionSetting" type="checkbox" role="switch"></label></section><section class="panel about"><span class="brand-word">lingo.</span><p>Türkçenin içinde küçük bir keşif.</p><p>44.056 kelime • 4–10 harf • 6 tahmin<br>Android sürümünde tamamen çevrimdışı.</p><button class="text-button" id="sources">Sözlük kaynakları ve lisanslar ↗</button><small>Sürüm 1.0.0 · Puanların bu cihazda saklanır.</small></section></main>
+
+    <nav id="navigation" class="bottom-nav" aria-label="Ana menü"><button data-screen="home" class="active"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H4V10m5 10v-7h6v7"/></svg><span>Oyna</span></button><button data-screen="statistics"><svg viewBox="0 0 24 24"><path d="M5 20V12m7 8V4m7 16V8"/></svg><span>İstatistik</span></button><button data-screen="settings"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><span>Ayarlar</span></button></nav>
+  </div>
+  <dialog id="dialog"><button id="closeDialog" class="icon-button close" aria-label="Kapat">×</button><div id="dialogBody"></div></dialog>
+  <div id="toast" role="status" hidden></div><div id="confetti" aria-hidden="true"></div>
+</body>
+</html>

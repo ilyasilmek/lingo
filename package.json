@@ -1,0 +1,13 @@
+{
+  "name": "lingo-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Çevrimdışı Türkçe Lingo — Android ve mobil web",
+  "scripts": {
+    "test": "node --test tests/engine.test.cjs",
+    "test:ui": "node tests/ui.test.cjs",
+    "start": "python3 -m http.server 8080",
+    "android:build": "cd android && ./gradlew assembleDebug bundleRelease lintRelease"
+  },
+  "devDependencies": { "@playwright/test": "1.55.1" }
+}

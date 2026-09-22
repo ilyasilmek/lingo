@@ -1,0 +1,47 @@
+plugins { id 'com.android.application' }
+
+def signingAvailable = System.getenv('ANDROID_KEYSTORE_PATH') != null
+android {
+    namespace 'com.ilyasilmek.lingo'
+    compileSdk 36
+    buildFeatures { buildConfig true }
+    defaultConfig {
+        applicationId 'com.ilyasilmek.lingo'
+        minSdk 26
+        targetSdk 36
+        versionCode = Integer.parseInt(System.getenv('ANDROID_VERSION_CODE') ?: '1')
+        versionName '1.0.0'
+    }
+    signingConfigs {
+        if (signingAvailable) {
+            release {
+                storeFile file(System.getenv('ANDROID_KEYSTORE_PATH'))
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        debug { applicationIdSuffix '.debug'; versionNameSuffix '-debug' }
+        release {
+            minifyEnabled false
+            if (signingAvailable) signingConfig signingConfigs.release
+        }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/lingoAssets')
+}
+
+tasks.register('syncGameAssets', Sync) {
+    into layout.buildDirectory.dir('generated/lingoAssets')
+    from('../../mobile') { into 'mobile' }
+    from('../../words.js')
+    from('../../meanings') { into 'meanings' }
+}
+tasks.named('preBuild').configure { dependsOn 'syncGameAssets' }
+
+dependencies {
+    implementation 'androidx.activity:activity:1.10.1'
+    implementation 'androidx.webkit:webkit:1.12.1'
+}

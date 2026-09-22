@@ -1,3 +1,24 @@
+# Lingo Mobile · Android
+
+**Bir kelime. Bir küçük zafer.**
+
+Türkçe Lingo’nun Android sürümü: mobil tasarım, 44.056 kelime, çevrimdışı anlamlar ve animasyonlu oyun.
+
+[Android paketlerini indir](https://github.com/ilyasilmek/lingo/releases) · [Mobil arayüzü aç](https://ilyasilmek.github.io/lingo/mobile/) · [Derleme ve imzalama](docs/ANDROID.md)
+
+- Klasik, süreli ve Türkiye saatine göre yenilenen günün kelimesi.
+- 4–10 harf, 6 tahmin, Türkçe klavye; I / İ ayrımı.
+- Açık/koyu tema, yüksek kontrast, hareket azaltma, ses ve titreşim seçenekleri.
+- Yarım kalan oyuna devam, istatistikler ve tekrar etmeyen hedefler.
+- Android 8.0+; Android paketi ilk açılıştan itibaren internet gerektirmez.
+- GitHub Actions: motor ve mobil arayüz testleri → Android lint → APK/AAB → indirilebilir ön sürüm.
+
+**APK** test imzasıyla kurulabilir. **AAB** release olarak derlenir; yayın anahtarı tanımlı değilse imzasızdır. Google Play için kendi yükleme anahtarınız gerekir. İmzalama sırları girildiğinde CI release APK ve imzalı AAB üretir.
+
+Mobil kaynaklar `mobile/`, Android projesi `android/`, testler `tests/` içindedir. Tarayıcıda geliştirme: `npm ci`, `npm test`, `npm start`, ardından `http://localhost:8080/mobile/`.
+
+---
+
 # 🟩 Lingo — Türkçe Kelime Oyunu
 
 **Bir kelime daha.** İlk harf bizden, gerisi senden.
