@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "build": "echo 'Build complete'",
+    "build": "node --check server.js && node --check app.js && node --check mobile/app.js && node --check mobile/engine.js && node --check words.js",
+    "lint": "node --check server.js && node --check app.js && node --check mobile/app.js && node --check mobile/engine.js && node --check words.js",
     "test": "node --test tests/engine.test.cjs",
     "test:ui": "node tests/ui.test.cjs",
     "android:build": "cd android && ./gradlew assembleDebug bundleRelease lintRelease"
@@ -14,8 +15,5 @@
   "devDependencies": {
     "@playwright/test": "1.55.1"
   },
-  "displayVersion": "1.54.01",
-  "dependencies": {
-    "express": "^5.2.1"
-  }
+  "displayVersion": "1.54.01"
 }

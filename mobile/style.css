@@ -3,3 +3,30 @@
 /* Keep the full keyboard on-screen on compact phones, including Android insets. */
 .tile{font-size:min(27px,calc((100vw - 70px) / var(--n) * .6))}
 @media(max-height:920px){body:has(.game-screen:not([hidden])) .topbar{height:60px}.game-screen .game-heading{margin-bottom:18px}.game-screen .board{max-width:350px;gap:5px}.game-screen .tile{height:clamp(24px,calc((100dvh - 470px) / 6),52px);max-height:none;aspect-ratio:auto}.game-screen .legend{margin-bottom:12px}.game-screen .key{height:43px}.game-screen .message{min-height:35px;padding-top:10px}}
+
+/* Context-Aware Hint System */
+.mobile-hint-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 12px;margin:0 auto 10px;max-width:350px}
+.mobile-hint-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--text);transition:all .15s}
+.mobile-hint-btn:not(:disabled):hover{background:var(--line);border-color:var(--present);color:#fff}
+.mobile-hint-btn:disabled{opacity:.4;cursor:not-allowed}
+.mobile-hint-btn.eligible{background:#352e25;border-color:var(--present);animation:mobile-pulse 2s infinite}
+.mobile-hint-btn .hint-bulb{font-size:14px}
+.mobile-hint-btn .hint-badge{background:#f2b8782a;color:var(--present);border:1px solid #f2b87850;border-radius:5px;padding:1px 5px;font-size:10px}
+.mobile-hint-bar .hint-note{font-size:10px;color:var(--muted);text-align:right;flex:1}
+.mobile-revealed-hints{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:350px;margin:0 auto 8px}
+.mobile-hint-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--present);border-radius:6px;padding:2px 8px;font-size:11px}
+.mobile-hint-chip .pos{color:var(--muted)}
+.mobile-hint-chip b{color:var(--present)}
+.tile.hint-revealed{border-color:var(--present)!important}
+.tile.hint-preview{color:var(--present);background:rgba(242,184,120,0.1);border-style:dashed;border-color:var(--present)!important}
+.tile.hint-preview::after{content:'✦';position:absolute;top:2px;right:3px;font-size:8px;color:var(--present)}
+.tile.hint-pop{animation:mobile-hint-reveal .4s ease-out}
+.key.hinted{border-color:var(--present);box-shadow:0 0 7px rgba(242,184,120,0.4)}
+.hint-modal-stats{display:flex;align-items:center;justify-content:center;gap:18px;margin:15px 0;padding:12px;background:var(--surface2);border-radius:12px;border:1px solid var(--line)}
+.hint-modal-stats span{display:block;font-size:10px;color:var(--muted);margin-bottom:3px}
+.hint-modal-stats b{font-size:20px}
+.dialog-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.dialog-actions button{flex:1}
+@keyframes mobile-pulse{0%,100%{box-shadow:0 0 0 0 rgba(242,184,120,0.2)}50%{box-shadow:0 0 8px 2px rgba(242,184,120,0.4)}}
+@keyframes mobile-hint-reveal{0%{transform:scale(0.85);opacity:0}50%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+

@@ -10,6 +10,7 @@
   const used = new Set(read('used', [])), dictionaries = new Map();
   let round = read('round', null), daily = read('daily', {}), length = 5, mode = 'classic', screen = 'home', loading = false, busy = false, animation = null, toastTimer, audio;
   if (round && (!words.has(round.target) || !Array.isArray(round.guesses) || round.guesses.length > 6)) round = null;
+  if (round && !Array.isArray(round.hints)) round.hints = [];
   const fmt = number => number.toLocaleString('tr-TR');
   const motionAllowed = () => !prefs.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches;
   function persist() { save('round', round); save('stats', stats); save('daily', daily); }
@@ -81,7 +82,7 @@
       }
       const target = newMode === 'daily' ? Lingo.dailyWord(pool, day) : Lingo.pick(pool, used, round?.target);
       save('used', [...used]);
-      round = { target, n, mode:newMode, day, guesses:[], input:target[0], done:false, won:false, remaining:30000, deadline:null };
+      round = { target, n, mode:newMode, day, guesses:[], hints:[], input:target[0], done:false, won:false, remaining:30000, deadline:null };
       if (newMode === 'daily') daily[day] = structuredClone(round);
       // Keep only recent daily results; daily targets are deterministic, independent of storage.
       Object.keys(daily).sort().slice(0,-45).forEach(key => delete daily[key]);
@@ -89,9 +90,108 @@
     } catch { toast('Sözlük yüklenemedi. Tekrar dene.'); }
     finally { loading = false; $('play').disabled = false; $('daily').disabled = false; }
   }
+  function updateMobileHintUI() {
+    if (!round) return;
+    const r = round;
+    const btn = $('mobileHintBtn'), note = $('mobileHintNote'), costEl = $('mobileHintCost'), revBar = $('mobileRevealedHints');
+    if (!btn || !note) return;
+    const cost = Lingo.hintCost(stats.score);
+    if (costEl) costEl.textContent = `-${cost} P`;
+    if (revBar) {
+      if (r.hints && r.hints.length > 0) {
+        revBar.hidden = false;
+        revBar.innerHTML = r.hints.map(c => `<span class="mobile-hint-chip"><span class="pos">${c+1}. Harf:</span> <b>${r.target[c]}</b></span>`).join('');
+      } else {
+        revBar.hidden = true;
+        revBar.replaceChildren();
+      }
+    }
+    if (r.done) {
+      btn.disabled = true;
+      btn.classList.remove('eligible');
+      note.textContent = 'Oyun tamamlandı';
+      return;
+    }
+    const attemptIndex = r.guesses.length;
+    if (attemptIndex < 3) {
+      btn.disabled = true;
+      btn.classList.remove('eligible');
+      note.textContent = `4. veya 5. tahminde aktif (${attemptIndex + 1} / 6)`;
+    } else if (attemptIndex > 4) {
+      btn.disabled = true;
+      btn.classList.remove('eligible');
+      note.textContent = 'Son tahminde ipucu yok';
+    } else {
+      const unrevealed = Lingo.getUnrevealedPositions(r.target, r.guesses, r.hints);
+      if (!unrevealed.length) {
+        btn.disabled = true;
+        btn.classList.remove('eligible');
+        note.textContent = 'Tüm harfler açıldı';
+      } else if (stats.score < cost) {
+        btn.disabled = true;
+        btn.classList.remove('eligible');
+        note.textContent = `Yetersiz puan (%20 = ${cost} P)`;
+      } else {
+        btn.disabled = false;
+        btn.classList.add('eligible');
+        note.textContent = `4/5. tahmin · -%20 P (${cost} P) ile harf aç`;
+      }
+    }
+  }
+  function useMobileHint() {
+    if (!round || round.done || busy || screen !== 'game' || $('dialog').open) return;
+    const r = round;
+    if (r.guesses.length !== 3 && r.guesses.length !== 4) {
+      if (r.guesses.length < 3) notify('İpucu yalnızca 4. ve 5. tahminlerde kullanılabilir.', true);
+      else notify('Son tahminde ipucu kullanılamaz.', true);
+      return;
+    }
+    const cost = Lingo.hintCost(stats.score);
+    if (stats.score < cost) {
+      shake(`İpucu için en az ${cost} puan gerekli (Mevcut: ${stats.score} P).`);
+      return;
+    }
+    const unrevealed = Lingo.getUnrevealedPositions(r.target, r.guesses, r.hints);
+    if (!unrevealed.length) {
+      notify('Kelimedeki tüm harf konumları zaten biliniyor.', true);
+      return;
+    }
+    modal(`
+      <span class="eyebrow">HARF İPUCU</span>
+      <h2>Doğru bir harf konumu açılsın mı?</h2>
+      <p>Toplam puanından <b>${cost} puan</b> harcanacak (%20). Henüz bulamadığın bir harfin tahtadaki doğru yeri gösterilecek.</p>
+      <div class="hint-modal-stats">
+        <div><span>Mevcut Puan</span><b>${fmt(stats.score)}</b></div>
+        <div class="arrow">→</div>
+        <div><span>Kalan Puan</span><b style="color:var(--present,#f2b878)">${fmt(stats.score - cost)}</b></div>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancelMobileHint" class="secondary" type="button">Vazgeç</button>
+        <button id="confirmMobileHint" class="primary" type="button">İpucu Al (-${cost} P)</button>
+      </div>
+    `);
+    $('cancelMobileHint').onclick = closeModal;
+    $('confirmMobileHint').onclick = () => {
+      closeModal();
+      if (!round || round.done || stats.score < cost) return;
+      stats.score = Math.max(0, stats.score - cost);
+      persist();
+      updateHome();
+      const pos = Lingo.pickHint(r.target, r.guesses, r.hints);
+      r.hints.push(pos);
+      persist();
+      renderGame();
+      feedback(true);
+      const activeRow = $('board').querySelector('.row.active');
+      const tile = activeRow?.children[pos];
+      tile?.classList.add('hint-pop');
+      notify(`💡 ${pos + 1}. harf açıldı: “${r.target[pos]}” (-${cost} puan)`);
+    };
+  }
   function renderGame(reveal = false) {
     if (!round) return;
     const r = round;
+    if (!Array.isArray(r.hints)) r.hints = [];
     $('gameMode').textContent = {classic:'KENDİ RİTMİNDE',timed:'ZAMANA KARŞI',daily:'GÜNÜN KELİMESİ'}[r.mode];
     $('gameTitle').textContent = `${r.n} harf, bir kelime.`;
     $('attempt').textContent = `${Math.min(r.guesses.length + (r.done ? 0 : 1),6)} / 6 TAHMİN`;
@@ -103,11 +203,16 @@
       const row = document.createElement('div'); row.className = 'row' + (rowIndex === r.guesses.length && !r.done ? ' active' : '');
       const guess = r.guesses[rowIndex];
       for (let c = 0; c < r.n; c++) {
-        const tile = document.createElement('div'), ch = guess ? guess.word[c] : rowIndex === r.guesses.length && !r.done ? r.input[c] : '';
+        const tile = document.createElement('div');
+        const isHinted = r.hints.includes(c);
+        let ch = guess ? guess.word[c] : rowIndex === r.guesses.length && !r.done ? r.input[c] : '';
+        const isPreview = !guess && rowIndex === r.guesses.length && !r.done && !ch && isHinted;
+        if (isPreview) ch = r.target[c];
+
         const state = guess?.result[c];
-        tile.className = 'tile' + (state ? ' ' + state : ch ? ' filled' : '') + (reveal && rowIndex === r.guesses.length-1 ? ' reveal' : '');
+        tile.className = 'tile' + (state ? ' ' + state : ch ? ' filled' : '') + (isHinted ? ' hint-revealed' : '') + (isPreview ? ' hint-preview' : '') + (reveal && rowIndex === r.guesses.length-1 ? ' reveal' : '');
         tile.textContent = ch || ''; tile.style.setProperty('--delay',`${c * 55}ms`);
-        tile.setAttribute('aria-label', ch ? `${ch}${state ? ', '+labels[state] : ''}` : 'Boş');
+        tile.setAttribute('aria-label', ch ? `${ch}${state ? ', '+labels[state] : isPreview ? ' ('+(c+1)+'. harf ipucu: '+r.target[c]+')' : ''}` : 'Boş');
         if (state && prefs.contrast) { const mark = document.createElement('small'); mark.textContent = {correct:'✓',present:'•',absent:'×'}[state]; mark.setAttribute('aria-hidden','true'); tile.append(mark); }
         row.append(tile);
       }
@@ -115,8 +220,14 @@
     }
     const ranks = {absent:1,present:2,correct:3}, states = {};
     r.guesses.forEach(g => [...g.word].forEach((ch,i) => { if ((ranks[states[ch]] || 0) < ranks[g.result[i]]) states[ch] = g.result[i]; }));
-    document.querySelectorAll('[data-key]').forEach(b => { b.className = 'key' + (b.dataset.key.length > 1 ? ' wide' : '') + (b.dataset.key === 'Enter' ? ' send' : '') + (states[b.dataset.key] ? ' ' + states[b.dataset.key] : ''); b.disabled = r.done || busy; });
+    r.hints.forEach(i => { if (r.target[i] && !states[r.target[i]]) states[r.target[i]] = 'hinted'; });
+    document.querySelectorAll('[data-key]').forEach(b => {
+      const state = states[b.dataset.key];
+      b.className = 'key' + (b.dataset.key.length > 1 ? ' wide' : '') + (b.dataset.key === 'Enter' ? ' send' : '') + (state === 'hinted' ? ' hinted' : state ? ' ' + state : '');
+      b.disabled = r.done || busy;
+    });
     $('keyboard').hidden = r.done; $('result').hidden = !r.done;
+    updateMobileHintUI();
     if (r.done) showResult();
   }
   function shake(text) {
@@ -195,7 +306,7 @@
     stats.history.forEach(item => { const row = document.createElement('div'); row.className='history-item'; const word=document.createElement('b'), detail=document.createElement('span'); word.textContent=item.word.toLocaleLowerCase('tr-TR'); detail.textContent=item.won?`${item.attempts}/6 · Bulundu`:'Keşfedildi'; row.append(word,detail); $('history').append(row); });
   }
   function help() {
-    modal('<span class="eyebrow">İLK HARF BİZDEN</span><h2>Bir kelime.<br>Altı tahmin.</h2><div class="help-row"><span class="correct">K</span><span class="present">A</span><span class="absent">L</span><span class="absent">E</span><span class="correct">M</span></div><div class="help-legend"><i class="correct"></i>Harf doğru yerde.</div><div class="help-legend"><i class="present"></i>Harf var, ama başka bir yerde.</div><div class="help-legend"><i class="absent"></i>Bu harften başka yok.</div><p>İlk harf sabittir. Kalan harfleri yaz ve GÖNDER’e dokun. Tekrarlanan harfler yalnızca kelimedeki sayıları kadar renklendirilir. I ve İ farklı harflerdir.</p><p><b>Süreli mod:</b> Her geçerli tahminden sonra 30 saniye. Uygulama arka plandayken veya yardım açıkken süre durur. Geçersiz tahmin süreyi yenilemez.</p><p><b>Puan:</b> (7 − tahmin sayısı) × harf sayısı × 10. Süreli modda iki katı. Günün kelimesi Türkiye saatine göre yenilenir.</p><button class="primary" id="understood">Anladım, hazırım!</button>');
+    modal('<span class="eyebrow">İLK HARF BİZDEN</span><h2>Bir kelime.<br>Altı tahmin.</h2><div class="help-row"><span class="correct">K</span><span class="present">A</span><span class="absent">L</span><span class="absent">E</span><span class="correct">M</span></div><div class="help-legend"><i class="correct"></i>Harf doğru yerde.</div><div class="help-legend"><i class="present"></i>Harf var, ama başka bir yerde.</div><div class="help-legend"><i class="absent"></i>Bu harften başka yok.</div><p>İlk harf sabittir. Kalan harfleri yaz ve GÖNDER’e dokun. Tekrarlanan harfler yalnızca kelimedeki sayıları kadar renklendirilir. I ve İ farklı harflerdir.</p><p><b>Harf İpucu:</b> 4. veya 5. tahmindeysen, toplam puanının %20’sini harcayarak kelimede henüz bulamadığın bir harfin tahtadaki doğru konumunu açabilirsin.</p><p><b>Süreli mod:</b> Her geçerli tahminden sonra 30 saniye. Uygulama arka plandayken veya yardım açıkken süre durur. Geçersiz tahmin süreyi yenilemez.</p><p><b>Puan:</b> (7 − tahmin sayısı) × harf sayısı × 10. Süreli modda iki katı. Günün kelimesi Türkiye saatine göre yenilenir.</p><button class="primary" id="understood">Anladım, hazırım!</button>');
     $('understood').onclick = closeModal;
   }
   for (let n=4;n<=10;n++) { const b=document.createElement('button'); b.textContent=n; b.setAttribute('aria-label',`${n} harf`); b.setAttribute('aria-pressed',String(n===length)); b.classList.toggle('selected',n===length); b.onclick=()=>{ length=n; [...$('lengths').children].forEach(el=>{el.classList.toggle('selected',Number(el.textContent)===n);el.setAttribute('aria-pressed',String(Number(el.textContent)===n));});}; $('lengths').append(b); }
@@ -212,6 +323,7 @@
   $('dialog').addEventListener('click',e=>{if(e.target===$('dialog')){const rect=$('dialog').getBoundingClientRect();if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)closeModal();}});
   for (const [id,key] of [['lightTheme','light'],['soundSetting','sound'],['hapticSetting','haptic'],['contrastSetting','contrast'],['motionSetting','motion']]) $(id).onchange=()=>{prefs[key]=$(id).checked;applyPrefs();if(key==='sound')feedback();};
   $('sources').onclick=()=>modal('<span class="eyebrow">KELİMELERİN KAYNAĞI</span><h2>Türkçeden ilhamla.</h2><p>44.056 kelime kabul edilir. Hedefler, anlamı bulunan 43.603 kelimeden seçilir. Klasik ve süreli modlarda aynı uzunluğun havuzu bitmeden kelime tekrarlanmaz. Az kullanılan ve eski sözcükler de vardır.</p><p>Kelime listesi: <a href="https://github.com/mertemin/turkish-word-list" target="_blank" rel="noopener">mertemin / turkish-word-list</a>.</p><p>Anlamlar: <a href="https://github.com/bilalozdemir/tr-word-list" target="_blank" rel="noopener">Bilal Özdemir / tr-word-list</a>, TDK derlemesi. <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>. Harf normalleştirmesi, oyun filtreleri, ilk üç anlam ve uzunluğa göre bölümleme uygulanmıştır. Türetilmiş anlam verisi aynı lisansla sunulur. Resmî TDK uygulaması değildir.</p><p>Reklam, hesap ve analiz takibi yoktur. Oyun verilerin cihazında saklanır.</p>');
+  $('mobileHintBtn').onclick=useMobileHint;
   $('share').onclick=async()=>{const r=round,text=`Lingo · ${r.mode==='daily'?r.day:r.n+' harf'} · ${r.won?r.guesses.length:'X'}/6\n${r.guesses.map(g=>g.result.map(s=>({correct:'🟩',present:'🟨',absent:'⬛'}[s])).join('')).join('\n')}\nhttps://ilyasilmek.github.io/lingo/mobile/`;try{if(navigator.share)await navigator.share({title:'Lingo',text});else if(navigator.clipboard){await navigator.clipboard.writeText(text);toast('Sonucun kopyalandı.');}else throw Error('share');}catch(e){if(e.name!=='AbortError'){modal('<h2>Sonucunu paylaş</h2><p>Aşağıdaki sonucu seçip kopyalayabilirsin.</p><pre id="shareText" style="white-space:pre-wrap;user-select:text;font-size:12px"></pre>');$('shareText').textContent=text;}}};
   document.addEventListener('keydown',e=>{if(e.ctrlKey||e.altKey||e.metaKey||$('dialog').open||screen!=='game')return;if(e.key==='Enter'&&document.activeElement.tagName==='BUTTON')return;if(e.key==='Enter'||e.key==='Backspace'||/^[a-zA-ZçğıöşüÇĞİÖŞÜ]$/.test(e.key)){e.preventDefault();type(e.key);}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else resumeClock();});

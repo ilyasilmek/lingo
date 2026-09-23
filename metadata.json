@@ -1,8 +1,4 @@
 {
-  "name": "Lingo",
-  "description": "Türkçe Lingo: binlerce kelime, altı tahmin ve yeni bir keşif. Ücretsiz kelime oyunu.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "name": "Lingo — Bir kelime daha",
+  "description": "Türkçe Lingo: binlerce kelime, altı tahmin ve yeni bir keşif. Ücretsiz kelime oyunu."
 }

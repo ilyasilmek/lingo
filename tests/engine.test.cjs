@@ -48,6 +48,52 @@ test('score rewards remaining attempts and doubles timed mode', () => {
   assert.equal(Lingo.score(5,6,'classic'),50);
   assert.equal(Lingo.score(5,2,'timed'),500);
 });
+test('hint system is context-aware and only available on 4th and 5th attempts with sufficient score', () => {
+  assert.equal(Lingo.hintCost(0), 20);
+  assert.equal(Lingo.hintCost(100), 20);
+  assert.equal(Lingo.hintCost(250), 50);
+  assert.equal(Lingo.hintCost(1000), 200);
+
+  // Attempt index 0, 1, 2 (1st, 2nd, 3rd) and 5 (6th) are not eligible
+  assert.equal(Lingo.isHintEligible(0, 500), false);
+  assert.equal(Lingo.isHintEligible(1, 500), false);
+  assert.equal(Lingo.isHintEligible(2, 500), false);
+  assert.equal(Lingo.isHintEligible(5, 500), false);
+
+  // 4th attempt (attemptCount === 3) and 5th attempt (attemptCount === 4) are eligible if score sufficient
+  assert.equal(Lingo.isHintEligible(3, 500), true);
+  assert.equal(Lingo.isHintEligible(4, 500), true);
+  assert.equal(Lingo.isHintEligible(3, 10), false); // insufficient score
+
+  // Context-aware unrevealed positions:
+  // Target: KALEM (length 5).
+  // Position 0 is K (always initially revealed in Lingo).
+  // Guess 1: KABAK -> results: correct, absent, absent, absent, absent
+  // Guess 2: KELAM -> results: correct, correct (E), correct (L), absent, absent (wait: KALEM vs KELAM: K correct, E present, L present, A present, M correct)
+  const target = 'KALEM';
+  const guesses = [
+    { word: 'KABAK', result: ['correct', 'absent', 'absent', 'absent', 'absent'] },
+    { word: 'KİTAP', result: ['correct', 'absent', 'present', 'correct', 'absent'] } // K(0) and A(3) are correct
+  ];
+  // Revealed positions should be 0 (always) and 3 (from KİTAP)
+  const revealed = Lingo.getRevealedPositions(target, guesses);
+  assert.ok(revealed.has(0));
+  assert.ok(revealed.has(3));
+  assert.equal(revealed.has(1), false);
+  assert.equal(revealed.has(2), false);
+  assert.equal(revealed.has(4), false);
+
+  const unrevealed = Lingo.getUnrevealedPositions(target, guesses);
+  assert.deepEqual(unrevealed, [1, 2, 4]); // A, L, M
+
+  // Pick hint picks only from unrevealed
+  const hintPos = Lingo.pickHint(target, guesses, [], () => 0.5);
+  assert.ok(unrevealed.includes(hintPos));
+
+  // If already hinted, it is excluded
+  const unrevealedWithHint = Lingo.getUnrevealedPositions(target, guesses, [1]);
+  assert.deepEqual(unrevealedWithHint, [2, 4]);
+});
 test('all packaged definitions are normalized and every playable length has targets', () => {
   let total=0;
   for (let n=4;n<=10;n++) {

@@ -45,6 +45,8 @@
     <main id="game" class="screen game-screen" hidden>
       <div class="game-heading"><button class="icon-button" data-action="home" aria-label="Oyunu kaydet ve ana sayfaya dön">‹</button><div><span class="eyebrow" id="gameMode">KLASİK</span><h2 id="gameTitle">5 harf, bir kelime.</h2></div><button class="icon-button" data-action="help" aria-label="Oyun kuralları">?</button></div>
       <div class="round-info"><span id="attempt">1 / 6 TAHMİN</span><span id="gameHint">İlk harf bizden</span></div>
+      <div id="mobileHintBar" class="mobile-hint-bar"><button id="mobileHintBtn" class="mobile-hint-btn" type="button" aria-label="Doğru bir harf konumu aç"><span class="hint-bulb">💡</span><span class="hint-label">Harf İpucu</span><span id="mobileHintCost" class="hint-badge">-%20 P</span></button><span id="mobileHintNote" class="hint-note">4. veya 5. tahminde aktif</span></div>
+      <div id="mobileRevealedHints" class="mobile-revealed-hints" hidden aria-live="polite"></div>
       <div id="timeTrack" class="time-track" hidden><div id="timeFill"></div></div>
       <div id="board" class="board" role="group" aria-label="Tahmin tahtası"></div>
       <p id="message" class="message" role="status" aria-live="polite"></p>
