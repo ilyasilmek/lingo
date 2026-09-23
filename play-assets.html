@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Lingo Play Store Asset Generator</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f101f;
+      color: #fff;
+      padding: 30px;
+      margin: 0;
+    }
+    h1 { color: #79f2ce; margin-bottom: 8px; }
+    p { color: #a5a9c9; margin-bottom: 24px; font-size: 15px; }
+    .asset-card {
+      background: #191c38;
+      border: 1px solid #2d3361;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .asset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .asset-title { font-size: 18px; font-weight: bold; color: #fff; }
+    .asset-badge {
+      background: #79f2ce22;
+      color: #79f2ce;
+      border: 1px solid #79f2ce55;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    button.download-btn {
+      background: linear-gradient(135deg, #79f2ce, #56dcce);
+      color: #0d2e27;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(121, 242, 206, 0.25);
+    }
+    button.download-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(121, 242, 206, 0.35);
+    }
+    canvas {
+      display: block;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #2d3361;
+    }
+    .preview-box {
+      margin-top: 15px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Lingo — Google Play Store Görsel Paketi</h1>
+  <p>Google Play Console'un talep ettiği tam ölçülerde (512x512 İkon, 1024x500 Banner ve Tanıtım Ekran Görüntüleri) otomatik olarak üretilmiştir. İndir butonuna tıklayarak bilgisayarınıza tek tıkla kaydedebilirsiniz.</p>
+
+  <!-- ASSET 1: APP ICON -->
+  <div class="asset-card">
+    <div class="asset-header">
+      <div>
+        <div class="asset-title">1. Uygulama Simgesi (App Icon)</div>
+        <div style="font-size: 13px; color: #8e95c2; margin-top: 4px;">Google Play zorunlu ölçüsü: 512 x 512 px (PNG)</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <span class="asset-badge">512 x 512 px</span>
+        <button class="download-btn" onclick="downloadCanvas('iconCanvas', 'lingo-icon-512x512.png')">⬇ PNG İndir</button>
+      </div>
+    </div>
+    <div class="preview-box">
+      <canvas id="iconCanvas" width="512" height="512" style="width: 256px; height: 256px;"></canvas>
+    </div>
+  </div>
+
+  <!-- ASSET 2: FEATURE GRAPHIC -->
+  <div class="asset-card">
+    <div class="asset-header">
+      <div>
+        <div class="asset-title">2. Özellik Grafiği (Feature Graphic - Banner)</div>
+        <div style="font-size: 13px; color: #8e95c2; margin-top: 4px;">Google Play zorunlu ölçüsü: 1024 x 500 px (PNG / JPG)</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <span class="asset-badge">1024 x 500 px</span>
+        <button class="download-btn" onclick="downloadCanvas('bannerCanvas', 'lingo-feature-graphic-1024x500.png')">⬇ PNG İndir</button>
+      </div>
+    </div>
+    <div class="preview-box">
+      <canvas id="bannerCanvas" width="1024" height="500"></canvas>
+    </div>
+  </div>
+
+  <!-- ASSET 3: SCREENSHOT 1 -->
+  <div class="asset-card">
+    <div class="asset-header">
+      <div>
+        <div class="asset-title">3. Mağaza Ekran Görüntüsü 1: Oyun Tahtası & Klavye</div>
+        <div style="font-size: 13px; color: #8e95c2; margin-top: 4px;">Tanıtım afişli telefon ekranı: 1080 x 1920 px</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <span class="asset-badge">1080 x 1920 px</span>
+        <button class="download-btn" onclick="downloadCanvas('ss1Canvas', 'lingo-screenshot-1.png')">⬇ PNG İndir</button>
+      </div>
+    </div>
+    <div class="preview-box">
+      <canvas id="ss1Canvas" width="1080" height="1920" style="width: 270px; height: 480px;"></canvas>
+    </div>
+  </div>
+
+  <!-- ASSET 4: SCREENSHOT 2 -->
+  <div class="asset-card">
+    <div class="asset-header">
+      <div>
+        <div class="asset-title">4. Mağaza Ekran Görüntüsü 2: Zafer & TDK Anlam Kartı</div>
+        <div style="font-size: 13px; color: #8e95c2; margin-top: 4px;">Tanıtım afişli telefon ekranı: 1080 x 1920 px</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <span class="asset-badge">1080 x 1920 px</span>
+        <button class="download-btn" onclick="downloadCanvas('ss2Canvas', 'lingo-screenshot-2.png')">⬇ PNG İndir</button>
+      </div>
+    </div>
+    <div class="preview-box">
+      <canvas id="ss2Canvas" width="1080" height="1920" style="width: 270px; height: 480px;"></canvas>
+    </div>
+  </div>
+
+  <!-- ASSET 5: SCREENSHOT 3 -->
+  <div class="asset-card">
+    <div class="asset-header">
+      <div>
+        <div class="asset-title">5. Mağaza Ekran Görüntüsü 3: Günün Kelimesi & Çevrimdışı Modlar</div>
+        <div style="font-size: 13px; color: #8e95c2; margin-top: 4px;">Tanıtım afişli telefon ekranı: 1080 x 1920 px</div>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center;">
+        <span class="asset-badge">1080 x 1920 px</span>
+        <button class="download-btn" onclick="downloadCanvas('ss3Canvas', 'lingo-screenshot-3.png')">⬇ PNG İndir</button>
+      </div>
+    </div>
+    <div class="preview-box">
+      <canvas id="ss3Canvas" width="1080" height="1920" style="width: 270px; height: 480px;"></canvas>
+    </div>
+  </div>
+
+  <script>
+    function downloadCanvas(canvasId, filename) {
+      const canvas = document.getElementById(canvasId);
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Helper: Draw Rounded Rect
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // 1. APP ICON (512x512)
+    function renderIcon() {
+      const c = document.getElementById('iconCanvas');
+      const ctx = c.getContext('2d');
+      // Background gradient
+      const bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
+      bgGrad.addColorStop(0, '#11132b');
+      bgGrad.addColorStop(1, '#1b1d42');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Subtle radial glow
+      const glow = ctx.createRadialGradient(256, 256, 40, 256, 256, 240);
+      glow.addColorStop(0, 'rgba(121, 242, 206, 0.25)');
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, 512, 512);
+
+      // App emblem tile
+      const tileGrad = ctx.createLinearGradient(116, 116, 396, 396);
+      tileGrad.addColorStop(0, '#a5ffca');
+      tileGrad.addColorStop(1, '#50dddb');
+      ctx.fillStyle = tileGrad;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = 32;
+      ctx.shadowOffsetY = 16;
+      roundRect(ctx, 116, 116, 280, 280, 72, true, false);
+      ctx.shadowColor = 'transparent';
+
+      // Inner stroke
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 118, 118, 276, 276, 70, false, true);
+
+      // Main 'l' letter
+      ctx.fillStyle = '#10382d';
+      ctx.font = '900 170px system-ui, -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('l', 230, 265);
+
+      // Yellow spark dot
+      ctx.fillStyle = '#ffcf5c';
+      ctx.beginPath();
+      ctx.arc(302, 195, 28, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mini decorative star
+      ctx.fillStyle = '#ffde7a';
+      ctx.font = 'bold 36px sans-serif';
+      ctx.fillText('✦', 360, 140);
+    }
+
+    // 2. FEATURE GRAPHIC (1024x500)
+    function renderBanner() {
+      const c = document.getElementById('bannerCanvas');
+      const ctx = c.getContext('2d');
+      // Background gradient
+      const bgGrad = ctx.createLinearGradient(0, 0, 1024, 500);
+      bgGrad.addColorStop(0, '#0c0d21');
+      bgGrad.addColorStop(0.5, '#15193d');
+      bgGrad.addColorStop(1, '#0e1128');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1024, 500);
+
+      // Glow spots
+      const glow1 = ctx.createRadialGradient(280, 250, 20, 280, 250, 300);
+      glow1.addColorStop(0, 'rgba(121, 242, 206, 0.18)');
+      glow1.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow1;
+      ctx.fillRect(0, 0, 1024, 500);
+
+      const glow2 = ctx.createRadialGradient(800, 200, 20, 800, 200, 320);
+      glow2.addColorStop(0, 'rgba(165, 142, 255, 0.22)');
+      glow2.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow2;
+      ctx.fillRect(0, 0, 1024, 500);
+
+      // Left side text: Brand & Motto
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+
+      // Badge
+      ctx.fillStyle = 'rgba(121, 242, 206, 0.15)';
+      roundRect(ctx, 80, 115, 230, 34, 8, true, false);
+      ctx.strokeStyle = 'rgba(121, 242, 206, 0.4)';
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, 80, 115, 230, 34, 8, false, true);
+
+      ctx.fillStyle = '#79f2ce';
+      ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.fillText('✦ TÜRKÇE KELİME OYUNU', 96, 137);
+
+      // Main Logo Text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 84px system-ui, sans-serif';
+      ctx.fillText('lingo', 80, 235);
+
+      ctx.fillStyle = '#79f2ce';
+      ctx.fillText('.', 275, 235);
+
+      // Subheading
+      ctx.fillStyle = '#c7baff';
+      ctx.font = '600 25px system-ui, sans-serif';
+      ctx.fillText('İlk harf bizden, gerisi senden.', 80, 285);
+
+      // Features list
+      ctx.fillStyle = '#a6abcf';
+      ctx.font = '500 16px system-ui, sans-serif';
+      ctx.fillText('✓ 44.000+ Kelime Havuzu (4–10 Harf)', 80, 340);
+      ctx.fillText('✓ Tamamen Çevrimdışı (İnternetsiz)', 80, 372);
+      ctx.fillText('✓ Günün Kelimesi & TDK Anlam Kartları', 80, 404);
+
+      // Right side: Colorful 3D Floating Word Tiles (L - İ - N - G - O)
+      const letters = [
+        { char: 'L', color: '#79e6b2', textColor: '#10352d', rot: -8, y: 220, x: 570 },
+        { char: 'İ', color: '#79e6b2', textColor: '#10352d', rot: 5, y: 200, x: 655 },
+        { char: 'N', color: '#ffc178', textColor: '#412811', rot: -5, y: 230, x: 740 },
+        { char: 'G', color: '#484d6d', textColor: '#ffffff', rot: 8, y: 195, x: 825 },
+        { char: 'O', color: '#79e6b2', textColor: '#10352d', rot: -4, y: 225, x: 910 }
+      ];
+
+      letters.forEach(item => {
+        ctx.save();
+        ctx.translate(item.x, item.y);
+        ctx.rotate((item.rot * Math.PI) / 180);
+
+        // Tile shadow
+        ctx.shadowColor = 'rgba(0,0,0,0.45)';
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 10;
+
+        // Tile body
+        ctx.fillStyle = item.color;
+        roundRect(ctx, -38, -44, 76, 88, 18, true, false);
+
+        // Tile highlight edge
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 2;
+        roundRect(ctx, -37, -43, 74, 86, 17, false, true);
+
+        // Char
+        ctx.shadowColor = 'transparent';
+        ctx.fillStyle = item.textColor;
+        ctx.font = '800 44px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(item.char, 0, 3);
+        ctx.restore();
+      });
+
+      // Bottom right badge
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      roundRect(ctx, 600, 370, 320, 48, 24, true, false);
+      ctx.fillStyle = '#ffcf73';
+      ctx.font = 'bold 15px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚡ Günün Kelimesi & Klasik Mod', 760, 400);
+    }
+
+    // 3. SCREENSHOT 1: THE GAMEPLAY (1080x1920)
+    function renderSS1() {
+      const c = document.getElementById('ss1Canvas');
+      const ctx = c.getContext('2d');
+      // BG
+      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
+      bgGrad.addColorStop(0, '#101229');
+      bgGrad.addColorStop(1, '#1b1e42');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Top Marketing Banner Area
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#79f2ce';
+      ctx.font = 'bold 36px system-ui, sans-serif';
+      ctx.fillText('TÜRKÇE KELİME MACERASI', 540, 180);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 74px system-ui, sans-serif';
+      ctx.fillText('İlk Harf Bizden,', 540, 270);
+      ctx.fillStyle = '#c9b8ff';
+      ctx.fillText('Gerisi Senden!', 540, 360);
+
+      // Draw Mockup Phone Container
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 25;
+      ctx.fillStyle = '#171a36';
+      roundRect(ctx, 120, 480, 840, 1340, 44, true, false);
+      ctx.shadowColor = 'transparent';
+
+      ctx.strokeStyle = '#3d446d';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 120, 480, 840, 1340, 44, false, true);
+
+      // Game Header inside phone
+      ctx.fillStyle = '#8f95c0';
+      ctx.font = '600 28px system-ui, sans-serif';
+      ctx.fillText('5 HARF · 1 / 6 TAHMİN', 540, 560);
+
+      // Draw Grid (6 rows of 5 tiles)
+      const rows = [
+        [ {c:'K', s:'c'}, {c:'A', s:'c'}, {c:'L', s:'p'}, {c:'E', s:'a'}, {c:'M', s:'a'} ],
+        [ {c:'K', s:'c'}, {c:'A', s:'c'}, {c:'S', s:'a'}, {c:'L', s:'c'}, {c:'I', s:'c'} ],
+        [ {c:'K', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'} ],
+        [ {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'} ],
+        [ {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'} ],
+        [ {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'}, {c:'', s:'_'} ]
+      ];
+
+      const startY = 620;
+      const tileSize = 110;
+      const gap = 16;
+      const startX = 540 - ((5 * tileSize + 4 * gap) / 2);
+
+      rows.forEach((row, rIdx) => {
+        row.forEach((cell, cIdx) => {
+          const x = startX + cIdx * (tileSize + gap);
+          const y = startY + rIdx * (tileSize + gap);
+
+          if (cell.s === 'c') {
+            ctx.fillStyle = '#79e6b2'; // correct
+          } else if (cell.s === 'p') {
+            ctx.fillStyle = '#ffc178'; // present
+          } else if (cell.s === 'a') {
+            ctx.fillStyle = '#484d6d'; // absent
+          } else {
+            ctx.fillStyle = '#232745'; // empty
+          }
+
+          roundRect(ctx, x, y, tileSize, tileSize, 18, true, false);
+          ctx.strokeStyle = '#3e476b';
+          ctx.lineWidth = 2;
+          roundRect(ctx, x, y, tileSize, tileSize, 18, false, true);
+
+          if (cell.c) {
+            ctx.fillStyle = (cell.s === 'c' || cell.s === 'p') ? '#123027' : '#ffffff';
+            ctx.font = '800 52px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(cell.c, x + tileSize / 2, y + tileSize / 2 + 3);
+          }
+        });
+      });
+
+      // Bottom Keyboard preview
+      const kbY = 1430;
+      ctx.fillStyle = '#2b3257';
+      roundRect(ctx, 160, kbY, 760, 280, 24, true, false);
+      ctx.fillStyle = '#c7baff';
+      ctx.font = '600 32px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('E R T Y U I O P Ğ Ü', 540, kbY + 70);
+      ctx.fillText('A S D F G H J K L Ş İ', 540, kbY + 140);
+      ctx.fillText('ENTER  Z C V B N M Ö Ç  ⌫', 540, kbY + 210);
+    }
+
+    // 4. SCREENSHOT 2: VICTORY & TDK MEANINGS (1080x1920)
+    function renderSS2() {
+      const c = document.getElementById('ss2Canvas');
+      const ctx = c.getContext('2d');
+
+      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
+      bgGrad.addColorStop(0, '#12142e');
+      bgGrad.addColorStop(1, '#1e244d');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Top Marketing
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffcf73';
+      ctx.font = 'bold 36px system-ui, sans-serif';
+      ctx.fillText('ÖĞRETİCİ VE EĞLENCELİ', 540, 180);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 74px system-ui, sans-serif';
+      ctx.fillText('TDK Sözlük Anlamı', 540, 270);
+      ctx.fillStyle = '#79f2ce';
+      ctx.fillText('Her Oyun Sonunda!', 540, 360);
+
+      // Card Container
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 25;
+      ctx.fillStyle = '#1b1f3d';
+      roundRect(ctx, 130, 480, 820, 1280, 44, true, false);
+      ctx.shadowColor = 'transparent';
+
+      ctx.strokeStyle = '#4e5987';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 130, 480, 820, 1280, 44, false, true);
+
+      // Medal
+      ctx.fillStyle = '#ffe78d';
+      ctx.font = '90px sans-serif';
+      ctx.fillText('🏆', 540, 620);
+
+      ctx.fillStyle = '#79f2ce';
+      ctx.font = 'bold 32px system-ui, sans-serif';
+      ctx.fillText('HARİKA BİR KEŞİF!', 540, 710);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 86px system-ui, sans-serif';
+      ctx.fillText('KASLI', 540, 810);
+
+      ctx.fillStyle = '#c9b8ff';
+      ctx.font = '600 32px system-ui, sans-serif';
+      ctx.fillText('+120 Puan Kazandın · 2. Tahmin', 540, 875);
+
+      // Meaning Box
+      ctx.fillStyle = '#23294f';
+      roundRect(ctx, 180, 950, 720, 360, 24, true, false);
+      ctx.strokeStyle = '#3e4875';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 180, 950, 720, 360, 24, false, true);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#79f2ce';
+      ctx.font = 'bold 26px system-ui, sans-serif';
+      ctx.fillText('TDK Tanımı:', 220, 1010);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '500 30px system-ui, sans-serif';
+      ctx.fillText('1. Kasları gelişmiş, adaleli, pehlivan', 220, 1070);
+      ctx.fillText('yapılı olan kimse.', 220, 1115);
+
+      ctx.fillStyle = '#9aa1c9';
+      ctx.font = 'italic 26px system-ui, sans-serif';
+      ctx.fillText('"Kaslı kollarıyla yükü tek hamlede kaldırdı."', 220, 1180);
+
+      ctx.fillStyle = '#ffcf73';
+      ctx.font = 'bold 22px system-ui, sans-serif';
+      ctx.fillText('✓ TDK Güncel Türkçe Sözlük Verisi', 220, 1260);
+
+      // Action Button
+      ctx.fillStyle = '#79f2ce';
+      roundRect(ctx, 240, 1420, 600, 100, 28, true, false);
+      ctx.fillStyle = '#0f3328';
+      ctx.font = 'bold 36px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Bir Kelime Daha ↗', 540, 1485);
+    }
+
+    // 5. SCREENSHOT 3: DAILY & MODES (1080x1920)
+    function renderSS3() {
+      const c = document.getElementById('ss3Canvas');
+      const ctx = c.getContext('2d');
+
+      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
+      bgGrad.addColorStop(0, '#111026');
+      bgGrad.addColorStop(1, '#251b3d');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Top Marketing
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#79f2ce';
+      ctx.font = 'bold 36px system-ui, sans-serif';
+      ctx.fillText('HER GÜN AYNI HEYECAN', 540, 180);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 74px system-ui, sans-serif';
+      ctx.fillText('Günün Kelimesi &', 540, 270);
+      ctx.fillStyle = '#ffc178';
+      ctx.fillText('4–10 Harf Seçenekleri', 540, 360);
+
+      // Main Card Container
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 40;
+      ctx.shadowOffsetY = 25;
+      ctx.fillStyle = '#1b1a38';
+      roundRect(ctx, 130, 480, 820, 1280, 44, true, false);
+      ctx.shadowColor = 'transparent';
+
+      ctx.strokeStyle = '#4e416d';
+      ctx.lineWidth = 4;
+      roundRect(ctx, 130, 480, 820, 1280, 44, false, true);
+
+      // Daily Banner Card inside
+      const dailyGrad = ctx.createLinearGradient(180, 540, 900, 780);
+      dailyGrad.addColorStop(0, '#7547a8');
+      dailyGrad.addColorStop(1, '#3c5ea6');
+      ctx.fillStyle = dailyGrad;
+      roundRect(ctx, 180, 540, 720, 260, 32, true, false);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffe0a2';
+      ctx.font = 'bold 24px system-ui, sans-serif';
+      ctx.fillText('✳ HER GÜN YENİ BİR MEYDAN OKUMA', 220, 610);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 48px system-ui, sans-serif';
+      ctx.fillText('Günün Kelimesi', 220, 680);
+
+      ctx.fillStyle = '#e4dcf9';
+      ctx.font = '500 26px system-ui, sans-serif';
+      ctx.fillText('Herkes için aynı kelime. Serini koru!', 220, 740);
+
+      // Letter Selection Preview
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 36px system-ui, sans-serif';
+      ctx.fillText('Kaç Harfle Oynayalım?', 220, 870);
+
+      // Length Pills (4, 5, 7, 10)
+      const lengths = [
+        { n: '4', sel: false, x: 220 },
+        { n: '5', sel: true, x: 390 },
+        { n: '7', sel: false, x: 560 },
+        { n: '10', sel: false, x: 730 }
+      ];
+
+      lengths.forEach(l => {
+        if (l.sel) {
+          ctx.fillStyle = '#a98bfd';
+          roundRect(ctx, l.x, 920, 140, 90, 20, true, false);
+          ctx.fillStyle = '#1c1236';
+        } else {
+          ctx.fillStyle = '#262445';
+          roundRect(ctx, l.x, 920, 140, 90, 20, true, false);
+          ctx.fillStyle = '#ffffff';
+        }
+        ctx.font = 'bold 44px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(l.n, l.x + 70, 980);
+      });
+
+      // Stats Preview Grid
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#232042';
+      roundRect(ctx, 180, 1070, 720, 320, 28, true, false);
+
+      ctx.fillStyle = '#79f2ce';
+      ctx.font = '900 68px system-ui, sans-serif';
+      ctx.fillText('44.056', 230, 1170);
+      ctx.fillStyle = '#a3a0c4';
+      ctx.font = '500 26px system-ui, sans-serif';
+      ctx.fillText('Türkçe Kelime Haznesi', 230, 1220);
+
+      ctx.fillStyle = '#ffcf73';
+      ctx.font = '900 68px system-ui, sans-serif';
+      ctx.fillText('%100', 580, 1170);
+      ctx.fillStyle = '#a3a0c4';
+      ctx.font = '500 26px system-ui, sans-serif';
+      ctx.fillText('Çevrimdışı (İnternetsiz)', 580, 1220);
+
+      // Feature tags at bottom
+      ctx.fillStyle = 'rgba(121, 242, 206, 0.15)';
+      roundRect(ctx, 180, 1450, 720, 90, 24, true, false);
+      ctx.fillStyle = '#79f2ce';
+      ctx.font = 'bold 30px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✈ Metroda, Uçakta, Yolda Kesintisiz Oyna', 540, 1505);
+    }
+
+    // Execute renders on load
+    window.onload = () => {
+      renderIcon();
+      renderBanner();
+      renderSS1();
+      renderSS2();
+      renderSS3();
+    };
+  </script>
+</body>
+</html>

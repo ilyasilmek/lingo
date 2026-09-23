@@ -9,8 +9,8 @@ android {
         applicationId 'com.stitchilyas.lingo'
         minSdk 26
         targetSdk 36
-        versionCode = 1540100 + Integer.parseInt(System.getenv('ANDROID_VERSION_CODE') ?: '0')
-        versionName '1.54.01'
+        versionCode = 1540200 + Integer.parseInt(System.getenv('ANDROID_VERSION_CODE') ?: '0')
+        versionName '1.54.02'
     }
     signingConfigs {
         if (signingAvailable) {

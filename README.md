@@ -1,8 +1,8 @@
-# Lingo Mobile · Android · 1.54.01
+# Lingo Mobile · Android · 1.54.02
 
 **Bir kelime. Bir küçük zafer.**
 
-1.54.01: Canlı renkler, atlanabilir animasyonlu açılış, hareketli harfler ve yeni zafer efektleri.
+1.54.02: Canlı renkler, net klavye kontrastı, atlanabilir animasyonlu açılış, hareketli harfler ve zafer efektleri.
 
 Türkçe Lingo’nun Android sürümü: mobil tasarım, 44.056 kelime, çevrimdışı anlamlar ve animasyonlu oyun.
 

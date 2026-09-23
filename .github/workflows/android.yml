@@ -68,12 +68,12 @@ jobs:
       - name: Collect packages
         run: |
           mkdir -p dist
-          cp android/app/build/outputs/apk/debug/app-debug.apk dist/lingo-1.54.01-debug.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist/lingo-1.54.02-debug.apk
           if [ -n "$ANDROID_KEYSTORE_PATH" ]; then
-            cp android/app/build/outputs/apk/release/app-release.apk dist/lingo-1.54.01-release.apk
-            cp android/app/build/outputs/bundle/release/app-release.aab dist/lingo-1.54.01-signed.aab
+            cp android/app/build/outputs/apk/release/app-release.apk dist/lingo-1.54.02-release.apk
+            cp android/app/build/outputs/bundle/release/app-release.aab dist/lingo-1.54.02-signed.aab
           else
-            cp android/app/build/outputs/bundle/release/app-release.aab dist/lingo-1.54.01-unsigned.aab
+            cp android/app/build/outputs/bundle/release/app-release.aab dist/lingo-1.54.02-unsigned.aab
           fi
           cp docs/ANDROID.md dist/BUILD-NOTES.md
           cd dist && sha256sum *.apk *.aab > SHA256SUMS.txt
@@ -90,7 +90,7 @@ jobs:
         run: |
           gh release create "mobile-build-${GITHUB_RUN_NUMBER}" dist/* \
             --target "$GITHUB_SHA" \
-            --title "Lingo Android 1.54.01 · Build ${GITHUB_RUN_NUMBER}" \
+            --title "Lingo Android 1.54.02 · Build ${GITHUB_RUN_NUMBER}" \
             --notes-file docs/RELEASE-NOTES.md --prerelease
       - name: Remove temporary signing key
         if: always()
