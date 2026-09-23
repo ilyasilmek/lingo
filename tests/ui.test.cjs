@@ -125,7 +125,7 @@ async function send(page, word) {
     assert.equal(await page.locator('#result').getAttribute('class'),'result-card won');
     await page.locator('[data-action="home"]').first().click();
     await page.locator('[data-screen="settings"]').click();
-    assert.match(await page.locator('.about small').textContent(),/1\.54\.01/);
+    assert.match(await page.locator('.about small').textContent(),/1\.54\.02/);
     assert.deepEqual(errors,[]);
     console.log('PASS: mobile sizes, all representative lengths, Turkish input, scoring, persistence, dictionary errors, timing, daily result, process recovery, themes.');
   } finally {if(browser)await browser.close();server.kill();}

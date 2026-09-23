@@ -36,18 +36,22 @@ body:has(.game-screen:not([hidden])) .topbar{display:none!important}
 [data-theme=light] .mobile-hint-bar .hint-note{color:#6c627d;font-weight:500}
 
 @media(max-height:920px){
-  .game-screen .game-heading{margin:8px 0 8px}
-  .game-screen .round-info{margin:0 auto 6px}
-  .game-screen .mobile-hint-bar{margin:0 auto 6px;padding:5px 10px}
-  .game-screen .mobile-revealed-hints{margin:0 auto 6px}
-  .game-screen .board{max-width:330px;gap:4px}
-  .game-screen .row{gap:4px}
-  .game-screen .tile{height:clamp(24px,calc((100dvh - 380px) / 6),48px);max-height:none;aspect-ratio:auto}
-  .game-screen .legend{margin:4px 0 6px}
-  .game-screen .key{height:40px}
-  .game-screen .key.wide{height:40px}
-  .game-screen .message{min-height:24px;padding:4px 0 2px}
-  .app:has(.game-screen:not([hidden])){padding:0 12px}
+  body:has(.game-screen:not([hidden])) .topbar{display:none!important}
+  .game-screen .game-heading{margin:2px 0 4px}
+  .game-screen .round-info{margin:0 auto 4px}
+  .game-screen .mobile-hint-bar{margin:0 auto 4px;padding:3px 8px}
+  .game-screen .mobile-revealed-hints{margin:0 auto 4px}
+  .game-screen .board{max-width:320px;gap:3px}
+  .game-screen .row{gap:3px}
+  .game-screen .tile{height:clamp(18px,calc((100dvh - 430px) / 6),40px);max-height:none;aspect-ratio:auto}
+  .game-screen .legend{margin:2px 0 4px}
+  .game-screen .keyboard{margin:0 -10px;padding:2px 0}
+  .game-screen .key-row{margin:3px 0;gap:4px}
+  .game-screen .key-row:nth-child(4){margin-top:4px}
+  .game-screen .key{height:36px}
+  .game-screen .key.wide{height:34px}
+  .game-screen .message{min-height:22px;padding:4px 0 2px}
+  .app:has(.game-screen:not([hidden])){padding:0 8px}
 }
 
 /* Context-Aware Hint System */
