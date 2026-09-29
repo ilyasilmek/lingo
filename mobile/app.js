@@ -18,7 +18,7 @@
     document.documentElement.dataset.theme = prefs.light ? 'light' : 'dark';
     document.documentElement.classList.toggle('high-contrast', prefs.contrast);
     document.documentElement.classList.toggle('reduce-motion', prefs.motion);
-    document.querySelector('meta[name="theme-color"]').content = prefs.light ? '#f5f3ff' : '#11132b';
+    document.querySelector('meta[name="theme-color"]').content = prefs.light ? '#f8f6f0' : '#141720';
     for (const [id, key] of [['lightTheme','light'], ['soundSetting','sound'], ['hapticSetting','haptic'], ['contrastSetting','contrast'], ['motionSetting','motion']]) $(id).checked = prefs[key];
     save('prefs', prefs);
   }
@@ -185,7 +185,7 @@
       const activeRow = $('board').querySelector('.row.active');
       const tile = activeRow?.children[pos];
       tile?.classList.add('hint-pop');
-      notify(`💡 ${pos + 1}. harf açıldı: “${r.target[pos]}” (-${cost} puan)`);
+      notify(`${pos + 1}. harf açıldı: “${r.target[pos]}” (-${cost} puan)`);
     };
   }
   function renderGame(reveal = false) {
@@ -271,11 +271,11 @@
   async function showResult() {
     const active = round;
     $('result').classList.toggle('won', active.won);
-    $('resultMedal').textContent = active.won ? '✦' : '✧';
-    $('resultLabel').textContent = active.won ? 'KELİMEYİ BULDUN ✦' : 'BU KEZ KELİME';
+    $('resultMedal').textContent = active.won ? '✓' : '—';
+    $('resultLabel').textContent = active.won ? 'KELİMEYİ BULDUN' : 'BU KEZ KELİME';
     $('answer').textContent = active.target.toLocaleLowerCase('tr-TR');
-    $('earned').textContent = active.won ? `+${active.points} puan · ${active.guesses.length}. tahminde buldun` : 'Bir kelime öğrendin. Bir sonrakinde görüşürüz.';
-    $('next').textContent = active.mode === 'daily' ? 'Klasik oyna ↗' : 'Bir kelime daha ↗';
+    $('earned').textContent = active.won ? `+${active.points} puan · ${active.guesses.length}. tahminde buldun` : 'Doğru kelime bulunamadı.';
+    $('next').textContent = active.mode === 'daily' ? 'Klasik Mod' : 'Yeni Kelime';
     $('definitions').textContent = 'Anlamı yükleniyor…';
     try {
       const dict = await dictionary(active.n);
@@ -291,7 +291,7 @@
   function celebrate() {
     if (prefs.motion || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     $('confetti').replaceChildren();
-    for (let i=0;i<35;i++) { const piece = document.createElement('i'); piece.style.left = `${Math.random()*100}%`; piece.style.animationDelay = `${Math.random()*.5}s`; piece.style.background = ['#a78bfa','#79f2ce','#ff9b8a','#ffe28a'][i%4]; $('confetti').append(piece); }
+    for (let i=0;i<35;i++) { const piece = document.createElement('i'); piece.style.left = `${Math.random()*100}%`; piece.style.animationDelay = `${Math.random()*.5}s`; piece.style.background = ['#43aa7b','#df973d','#d6cfbf','#383e50'][i%4]; $('confetti').append(piece); }
     setTimeout(() => $('confetti').replaceChildren(),2700);
   }
   function renderStats() {
@@ -302,29 +302,29 @@
     $('distribution').replaceChildren(); const max = Math.max(1,...stats.distribution);
     stats.distribution.forEach((count,i) => { const row = document.createElement('div'); row.className = 'bar-row'; const label = document.createElement('span'), bar = document.createElement('div'); label.textContent = i+1; bar.className = 'bar'; bar.style.width = `${Math.max(9,count/max*91)}%`; bar.textContent = count; row.append(label,bar); $('distribution').append(row); });
     $('history').replaceChildren();
-    if (!stats.history.length) { $('history').innerHTML = '<p class="empty">İlk kelimeni bul, hikâyen başlasın.</p>'; return; }
-    stats.history.forEach(item => { const row = document.createElement('div'); row.className='history-item'; const word=document.createElement('b'), detail=document.createElement('span'); word.textContent=item.word.toLocaleLowerCase('tr-TR'); detail.textContent=item.won?`${item.attempts}/6 · Bulundu`:'Keşfedildi'; row.append(word,detail); $('history').append(row); });
+    if (!stats.history.length) { $('history').innerHTML = '<p class="empty">Henüz tamamlanan bir oyun bulunmuyor.</p>'; return; }
+    stats.history.forEach(item => { const row = document.createElement('div'); row.className='history-item'; const word=document.createElement('b'), detail=document.createElement('span'); word.textContent=item.word.toLocaleLowerCase('tr-TR'); detail.textContent=item.won?`${item.attempts}/6 · Bulundu`:'Bulunamadı'; row.append(word,detail); $('history').append(row); });
   }
   function help() {
-    modal('<span class="eyebrow">İLK HARF BİZDEN</span><h2>Bir kelime.<br>Altı tahmin.</h2><div class="help-row"><span class="correct">K</span><span class="present">A</span><span class="absent">L</span><span class="absent">E</span><span class="correct">M</span></div><div class="help-legend"><i class="correct"></i>Harf doğru yerde.</div><div class="help-legend"><i class="present"></i>Harf var, ama başka bir yerde.</div><div class="help-legend"><i class="absent"></i>Bu harften başka yok.</div><p>İlk harf sabittir. Kalan harfleri yaz ve GÖNDER’e dokun. Tekrarlanan harfler yalnızca kelimedeki sayıları kadar renklendirilir. I ve İ farklı harflerdir.</p><p><b>Harf İpucu:</b> 4. veya 5. tahmindeysen, toplam puanının %20’sini harcayarak kelimede henüz bulamadığın bir harfin tahtadaki doğru konumunu açabilirsin.</p><p><b>Süreli mod:</b> Her geçerli tahminden sonra 30 saniye. Uygulama arka plandayken veya yardım açıkken süre durur. Geçersiz tahmin süreyi yenilemez.</p><p><b>Puan:</b> (7 − tahmin sayısı) × harf sayısı × 10. Süreli modda iki katı. Günün kelimesi Türkiye saatine göre yenilenir.</p><button class="primary" id="understood">Anladım, hazırım!</button>');
+    modal('<span class="eyebrow">İLK HARF BİZDEN</span><h2>Bir kelime.<br>Altı tahmin.</h2><div class="help-row"><span class="correct">K</span><span class="present">A</span><span class="absent">L</span><span class="absent">E</span><span class="correct">M</span></div><div class="help-legend"><i class="correct"></i>Harf doğru yerde.</div><div class="help-legend"><i class="present"></i>Harf var, ama başka bir yerde.</div><div class="help-legend"><i class="absent"></i>Bu harften başka yok.</div><p>İlk harf sabittir. Kalan harfleri yaz ve GÖNDER’e dokun. Tekrarlanan harfler yalnızca kelimedeki sayıları kadar renklendirilir. I ve İ farklı harflerdir.</p><p><b>Harf İpucu:</b> 4. veya 5. tahmindeysen, toplam puanının %20’sini harcayarak kelimede henüz bulamadığın bir harfin tahtadaki doğru konumunu açabilirsin.</p><p><b>Süreli mod:</b> Her geçerli tahminden sonra 30 saniye. Uygulama arka plandayken veya yardım açıkken süre durur. Geçersiz tahmin süreyi yenilemez.</p><p><b>Puan:</b> (7 − tahmin sayısı) × harf sayısı × 10. Süreli modda iki katı. Günün kelimesi Türkiye saatine göre yenilenir.</p><button class="primary" id="understood">Anladım</button>');
     $('understood').onclick = closeModal;
   }
   for (let n=4;n<=10;n++) { const b=document.createElement('button'); b.textContent=n; b.setAttribute('aria-label',`${n} harf`); b.setAttribute('aria-pressed',String(n===length)); b.classList.toggle('selected',n===length); b.onclick=()=>{ length=n; [...$('lengths').children].forEach(el=>{el.classList.toggle('selected',Number(el.textContent)===n);el.setAttribute('aria-pressed',String(Number(el.textContent)===n));});}; $('lengths').append(b); }
   ['ERTYUIOPĞÜ','ASDFGHJKLŞİ','ZCVBNMÖÇ',['Backspace','Enter']].forEach(keys=>{ const row=document.createElement('div');row.className='key-row';[...keys].forEach(key=>{const b=document.createElement('button');b.dataset.key=key;b.className='key'+(key.length>1?' wide':'')+(key==='Enter'?' send':'');b.textContent=key==='Enter'?'GÖNDER ↵':key==='Backspace'?'⌫ SİL':key;b.setAttribute('aria-label',key==='Enter'?'Tahmini gönder':key==='Backspace'?'Son harfi sil':key);b.onclick=()=>type(key);row.append(b);});$('keyboard').append(row);});
-  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(el=>{el.classList.toggle('selected',el===b);el.setAttribute('aria-pressed',String(el===b));});$('modeDescription').textContent=mode==='timed'?'Her tahmine 30 saniye. İki kat puan.':'Acele yok. Düşün, keşfet, kelimeyi bul.';});
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(el=>{el.classList.toggle('selected',el===b);el.setAttribute('aria-pressed',String(el===b));});$('modeDescription').textContent=mode==='timed'?'Her tahmine 30 saniye. İki kat puan.':'Süre kısıtı yok. Harfleri dene, kelimeyi bul.';});
   document.querySelectorAll('[data-screen]').forEach(b=>b.onclick=()=>navigate(b.dataset.screen));
   document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>b.dataset.action==='help'?help():navigate('home'));
   $('play').onclick=()=>confirmStart(()=>start());
   $('daily').onclick=()=>{if(round?.mode==='daily'&&round.day===Lingo.dayKey()){navigate('game');return;}confirmStart(()=>start('daily'));};
-  $('resume').onclick=()=>{navigate('game');notify('Kaldığın yerden devam et.');};
+  $('resume').onclick=()=>{navigate('game');notify('Kayıtlı oyuna devam ediliyor.');};
   $('next').onclick=()=>start(round.mode==='daily'?'classic':round.mode);
   $('closeDialog').onclick=closeModal;
   $('dialog').addEventListener('close',resumeClock);
   $('dialog').addEventListener('click',e=>{if(e.target===$('dialog')){const rect=$('dialog').getBoundingClientRect();if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)closeModal();}});
   for (const [id,key] of [['lightTheme','light'],['soundSetting','sound'],['hapticSetting','haptic'],['contrastSetting','contrast'],['motionSetting','motion']]) $(id).onchange=()=>{prefs[key]=$(id).checked;applyPrefs();if(key==='sound')feedback();};
-  $('sources').onclick=()=>modal('<span class="eyebrow">KELİMELERİN KAYNAĞI</span><h2>Türkçeden ilhamla.</h2><p>44.056 kelime kabul edilir. Hedefler, anlamı bulunan 43.603 kelimeden seçilir. Klasik ve süreli modlarda aynı uzunluğun havuzu bitmeden kelime tekrarlanmaz. Az kullanılan ve eski sözcükler de vardır.</p><p>Kelime listesi: <a href="https://github.com/mertemin/turkish-word-list" target="_blank" rel="noopener">mertemin / turkish-word-list</a>.</p><p>Anlamlar: <a href="https://github.com/bilalozdemir/tr-word-list" target="_blank" rel="noopener">Bilal Özdemir / tr-word-list</a>, TDK derlemesi. <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>. Harf normalleştirmesi, oyun filtreleri, ilk üç anlam ve uzunluğa göre bölümleme uygulanmıştır. Türetilmiş anlam verisi aynı lisansla sunulur. Resmî TDK uygulaması değildir.</p><p>Reklam, hesap ve analiz takibi yoktur. Oyun verilerin cihazında saklanır.</p>');
+  $('sources').onclick=()=>modal('<span class="eyebrow">SÖZLÜK BİLGİSİ</span><h2>Kaynaklar ve Lisanslar</h2><p>44.056 kelime kabul edilir. Hedefler, anlamı bulunan 43.603 kelimeden seçilir. Klasik ve süreli modlarda aynı uzunluğun havuzu bitmeden kelime tekrarlanmaz. Az kullanılan ve eski sözcükler de vardır.</p><p>Kelime listesi: <a href="https://github.com/mertemin/turkish-word-list" target="_blank" rel="noopener">mertemin / turkish-word-list</a>.</p><p>Anlamlar: <a href="https://github.com/bilalozdemir/tr-word-list" target="_blank" rel="noopener">Bilal Özdemir / tr-word-list</a>, TDK derlemesi. <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>. Harf normalleştirmesi, oyun filtreleri, ilk üç anlam ve uzunluğa göre bölümleme uygulanmıştır. Türetilmiş anlam verisi aynı lisansla sunulur. Resmî TDK uygulaması değildir.</p><p>Reklam, hesap ve analiz takibi yoktur. Oyun verilerin cihazında saklanır.</p>');
   $('mobileHintBtn').onclick=useMobileHint;
-  $('share').onclick=async()=>{const r=round,text=`Lingo · ${r.mode==='daily'?r.day:r.n+' harf'} · ${r.won?r.guesses.length:'X'}/6\n${r.guesses.map(g=>g.result.map(s=>({correct:'🟩',present:'🟨',absent:'⬛'}[s])).join('')).join('\n')}\nhttps://ilyasilmek.github.io/lingo/mobile/`;try{if(navigator.share)await navigator.share({title:'Lingo',text});else if(navigator.clipboard){await navigator.clipboard.writeText(text);toast('Sonucun kopyalandı.');}else throw Error('share');}catch(e){if(e.name!=='AbortError'){modal('<h2>Sonucunu paylaş</h2><p>Aşağıdaki sonucu seçip kopyalayabilirsin.</p><pre id="shareText" style="white-space:pre-wrap;user-select:text;font-size:12px"></pre>');$('shareText').textContent=text;}}};
+  $('share').onclick=async()=>{const r=round,text=`Lingo · ${r.mode==='daily'?r.day:r.n+' harf'} · ${r.won?r.guesses.length:'X'}/6\n${r.guesses.map(g=>g.result.map(s=>({correct:'🟩',present:'🟨',absent:'⬛'}[s])).join('')).join('\n')}\nhttps://ilyasilmek.github.io/lingo/mobile/`;try{if(navigator.share)await navigator.share({title:'Lingo',text});else if(navigator.clipboard){await navigator.clipboard.writeText(text);toast('Sonuç panoya kopyalandı.');}else throw Error('share');}catch(e){if(e.name!=='AbortError'){modal('<h2>Sonucunu paylaş</h2><p>Aşağıdaki sonucu seçip kopyalayabilirsin.</p><pre id="shareText" style="white-space:pre-wrap;user-select:text;font-size:12px"></pre>');$('shareText').textContent=text;}}};
   document.addEventListener('keydown',e=>{if(e.ctrlKey||e.altKey||e.metaKey||$('dialog').open||screen!=='game')return;if(e.key==='Enter'&&document.activeElement.tagName==='BUTTON')return;if(e.key==='Enter'||e.key==='Backspace'||/^[a-zA-ZçğıöşüÇĞİÖŞÜ]$/.test(e.key)){e.preventDefault();type(e.key);}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else resumeClock();});
   window.addEventListener('pagehide',pause);
@@ -332,7 +332,7 @@
   setInterval(()=>{
     if(!round||round.done||busy||round.mode!=='timed'||screen!=='game'||!round.deadline)return;
     round.remaining=Math.max(0,round.deadline-Date.now());$('gameHint').textContent=`${Math.ceil(round.remaining/1000)} sn`;$('timeFill').style.width=`${round.remaining/300}%`;
-    if(round.remaining===0){finish(false);notify('Süre doldu. Yeni kelime, yeni bir şans.');}
+    if(round.remaining===0){finish(false);notify('Süre doldu.');}
   },100);
   // Recover a process kill during tile reveal without dropping or counting a guess twice.
   if(round&&!round.done&&round.guesses.length){const last=round.guesses.at(-1);if(last.word===round.target||round.guesses.length===6)finish(last.word===round.target,true);}
