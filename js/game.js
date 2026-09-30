@@ -6,6 +6,9 @@ export const DEFAULT_LENGTH = 5;
 export const DAILY_LENGTH = 5;
 export const MAX_GUESSES = 6;
 export const TIME_ATTACK_SECONDS = 60;
+// Süreli Klasik: her tahmin için süre. Süre dolan tahmin hakkı yanar. Ödül %50 fazladır.
+export const TIMED_TURN_SECONDS = 30;
+export const TIMED_REWARD_FACTOR = 1.5;
 
 export const ALPHABET = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
 
@@ -57,6 +60,7 @@ export function keyboardStates(guesses, evaluations) {
   const states = {};
   guesses.forEach((word, row) => {
     [...word].forEach((ch, i) => {
+      if (ch === ' ') return; // süresi dolan tahmin
       const s = evaluations[row][i];
       if (!states[ch] || RANK[s] > RANK[states[ch]]) states[ch] = s;
     });
@@ -116,6 +120,17 @@ export function scoreRound({ attempts, seconds, streak = 0, hintsUsed = 0, lengt
   const score = Math.max(0, Math.round((base - hintPenalty) * multiplier));
   const coins = 10 + (MAX_GUESSES - attempts) * 5;
   return { base, speedBonus, hintPenalty, multiplier, score, xp: score + speedBonus, coins };
+}
+
+// Süresi dolan tahmin, tahta ve istatistik açısından boşluklardan oluşan bir tahmin olarak saklanır.
+// Boşluk alfabede olmadığı için değerlendirmesi tamamen "kelimede yok" çıkar; bilinen harflere,
+// klavye renklerine ve zor mod kurallarına hiçbir şey eklemez.
+export const timeoutGuess = (length) => ' '.repeat(length);
+export const isTimeoutGuess = (guess) => typeof guess === 'string' && guess.length > 0 && guess.trim() === '';
+
+// Süreli oyunda XP ve coin artırılır; puan (skor) aynı kalır.
+export function timedReward(reward) {
+  return { ...reward, xp: Math.round(reward.xp * TIMED_REWARD_FACTOR), coins: Math.round(reward.coins * TIMED_REWARD_FACTOR) };
 }
 
 // Tarih yardımcıları (yerel saate göre gün).

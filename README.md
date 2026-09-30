@@ -27,7 +27,7 @@ Takıldığında ampul simgesine basıp bir harf açtırabilirsin. İpucu 4. tah
 
 **Günün Kelimesi.** Herkes aynı gün aynı 5 harfli kelimeyi arar. Kelime gece yarısı değişir, ödülü iki katıdır.
 
-**Klasik.** Seçtiğin uzunlukta rastgele bir kelime, süre sınırı yok. Oyunu yarıda bırakırsan kaydedilir. Tekrar açtığında devam etmek mi yoksa yeni oyun mu istediğin sorulur.
+**Klasik.** Seçtiğin uzunlukta rastgele bir kelime, süre sınırı yok. Oyunu yarıda bırakırsan kaydedilir. Tekrar açtığında devam etmek mi yoksa yeni oyun mu istediğin sorulur. Ana sayfadaki **Süreli Klasik** anahtarını açarsan her tahmin için 30 saniyen olur; süre dolarsa o tahmin hakkı yanar. Süreli oyunda kazandığın XP ve coin %50 fazladır.
 
 **Zamana Karşı.** 60 saniyede bilebildiğin kadar kelime bil. Bir kelimeyi bulunca ya da altı hakkın bitince hemen yenisi gelir.
 

@@ -610,6 +610,12 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .tint-sage    { --tint-bg: var(--tint-sage-bg);    --tint-bd: var(--tint-sage-bd); }
 .mode.tint:not(:disabled):hover { box-shadow: var(--shadow-2); border-color: color-mix(in srgb, var(--tint-bd) 60%, var(--text-3)); }
 .tint .length-options { background: var(--tint-dot); }
+.timed-row { flex-basis: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 10px; border-top: 1px solid var(--tint-dot); }
+.timed-row label { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+.timed-row label .icon { width: 18px; height: 18px; }
+.timed-row small { display: block; color: var(--text-2); font-size: 12px; line-height: 16px; margin-top: 2px; }
+.timed-row .switch { flex: none; }
+.tile.timeout .face.back { background: repeating-linear-gradient(135deg, var(--absent-bg) 0 6px, var(--surface-low) 6px 12px); }
 .tint .bar { background: var(--tint-dot); }
 .lilac-ink { color: #6b4fc7; }
 .sky-ink { color: #2f64b8; }

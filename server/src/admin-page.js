@@ -21,6 +21,9 @@ export const ADMIN_HTML = `<!doctype html>
   button.ghost { background:transparent; color:var(--muted); border:1.5px solid var(--line); }
   button.hide { background:var(--danger); }
   button.show { background:var(--ok); }
+  button.delete { background:transparent; color:var(--danger); border:1.5px solid var(--danger); }
+  td.actions { white-space:nowrap; }
+  td.actions button + button { margin-left:6px; }
   .row { display:flex; gap:10px; align-items:center; }
   .row input { flex:1; }
   table { width:100%; border-collapse:collapse; }
@@ -31,14 +34,17 @@ export const ADMIN_HTML = `<!doctype html>
   .tag { font-size:12px; font-weight:700; padding:2px 8px; border-radius:999px; background:#ffdad6; color:var(--danger); }
   .msg { min-height:20px; margin:8px 0 0; font-weight:600; }
   .msg.err { color:var(--danger); }
-  .id { font-family: ui-monospace, monospace; font-size:11px; color:var(--muted); }
+  .id { font-family: ui-monospace, monospace; font-size:11px; color:var(--muted); word-break:break-all; }
+  .table-wrap { overflow-x:auto; }
+  .table-wrap table { min-width:560px; }
+  @media (max-width:520px) { .row { flex-wrap:wrap; } .row input { flex-basis:100%; } }
   [hidden] { display:none !important; }
 </style>
 </head>
 <body>
 <main>
   <h1>Lingo Yönetim</h1>
-  <p>Skor tablosundaki uygunsuz adları gizlemek için. Gizlenen oyuncunun skorları silinmez, yalnızca listelerde görünmez.</p>
+  <p><b>Gizle</b>: uygunsuz adları listeden kaldırır, skorlar silinmez. <b>Sil</b>: silme talebi gelen oyuncunun kaydını ve bütün skorlarını kalıcı olarak siler.</p>
 
   <section class="card" id="login">
     <form class="row" id="login-form">
@@ -57,7 +63,7 @@ export const ADMIN_HTML = `<!doctype html>
       </form>
       <div class="msg" id="panel-msg"></div>
     </div>
-    <div class="card">
+    <div class="card table-wrap">
       <table>
         <thead><tr><th>Ad</th><th>Oyun</th><th>Puan</th><th>Son oyun</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
@@ -92,9 +98,9 @@ export const ADMIN_HTML = `<!doctype html>
           <td class="num">\${p.games}</td>
           <td class="num">\${p.points}</td>
           <td>\${p.last_day || '-'}</td>
-          <td>\${p.clash ? '' : p.hidden
+          <td class="actions">\${p.clash ? '' : p.hidden
             ? \`<button class="show" data-id="\${p.id}" data-hidden="false">Göster</button>\`
-            : \`<button class="hide" data-id="\${p.id}" data-hidden="true">Gizle</button>\`}</td>
+            : \`<button class="hide" data-id="\${p.id}" data-hidden="true">Gizle</button>\`}<button class="delete" data-id="\${p.id}" data-delete="\${esc(p.name)}">Sil</button></td>
         </tr>\`).join('') || '<tr><td colspan="5">Oyuncu bulunamadı.</td></tr>';
       $('panel-msg').textContent = data.players.length + ' oyuncu gösteriliyor (toplam ' + data.total + ').';
     } catch (e) {
@@ -124,6 +130,17 @@ export const ADMIN_HTML = `<!doctype html>
   $('rows').addEventListener('click', async (e) => {
     const b = e.target.closest('button[data-id]');
     if (!b) return;
+    if (b.dataset.delete !== undefined) {
+      const ok = confirm('"' + b.dataset.delete + '" adlı oyuncu ve bütün skorları kalıcı olarak silinsin mi?\\n\\nBu işlem geri alınamaz. Ad başka oyunculara açılır.');
+      if (!ok) return;
+      b.disabled = true;
+      try {
+        const r = await api('/v1/sil', { id: b.dataset.id });
+        await load();
+        $('panel-msg').textContent = r.deleted ? '"' + b.dataset.delete + '" silindi (' + r.scores + ' skor).' : 'Oyuncu zaten silinmiş.';
+      } catch (err) { $('panel-msg').textContent = err.message; b.disabled = false; }
+      return;
+    }
     const hide = b.dataset.hidden === 'true';
     if (hide && !confirm('Bu oyuncu skor tablosundan gizlensin mi?')) return;
     b.disabled = true;

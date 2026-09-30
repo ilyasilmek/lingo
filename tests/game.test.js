@@ -4,7 +4,9 @@ import { readFileSync } from 'node:fs';
 import {
   evaluateGuess, keyboardStates, knownLetters, pickHint, scoreRound, trUpper,
   dailyIndex, seededShuffle, leagueFor, ALPHABET, KEYBOARD_ROWS, MIN_LENGTH, MAX_LENGTH,
+  timeoutGuess, isTimeoutGuess, timedReward, TIMED_REWARD_FACTOR,
 } from '../js/game.js';
+import { hardModeViolation } from '../js/progress.js';
 
 const list = (name) => readFileSync(new URL(`../data/${name}.txt`, import.meta.url), 'utf8').split('\n').filter(Boolean);
 
@@ -170,4 +172,35 @@ test('ipucu: son bilinmeyen harf açılmaz (4 harfte en fazla 2)', () => {
   assert.match(st.reason, /Son harfi/);
   const none = hintStatus('ELMA', g, g.map(() => ['correct', 'absent', 'absent', 'absent']));
   assert.equal(none.left, 2);
+});
+
+test('süresi dolan tahmin: hepsi "kelimede yok", hiçbir bilgi eklemez', () => {
+  const g = timeoutGuess(5);
+  assert.equal(g, '     ');
+  assert.ok(isTimeoutGuess(g));
+  assert.ok(!isTimeoutGuess('KABLO'));
+  assert.ok(!isTimeoutGuess(''));
+  const ev = evaluateGuess(g, 'KABLO');
+  assert.deepEqual(ev, [A, A, A, A, A]);
+  assert.deepEqual(keyboardStates([g], [ev]), {});
+  assert.deepEqual([...knownLetters([...'KABLO'], [ev])], [[0, 'K']]);
+  // Zor modda süresi dolan satır sonraki tahmine kural koymaz.
+  assert.equal(hardModeViolation('KİLİT', [g], [ev]), null);
+});
+
+test('süresi dolan tahmin de bir hak sayılır (ipucu 4. tahminde açılır)', () => {
+  const answer = [...'KABLO'];
+  const guesses = ['KİLİT', timeoutGuess(5), timeoutGuess(5)];
+  const evs = guesses.map((g) => evaluateGuess(g, 'KABLO'));
+  assert.equal(hintStatus(answer, guesses.slice(0, 2), evs.slice(0, 2)).allowed, false);
+  assert.equal(hintStatus(answer, guesses, evs).allowed, true);
+});
+
+test('süreli oyun ödülü: XP ve coin %50 fazla, skor aynı', () => {
+  const r = scoreRound({ attempts: 3, seconds: 40 });
+  const t = timedReward(r);
+  assert.equal(TIMED_REWARD_FACTOR, 1.5);
+  assert.equal(t.score, r.score);
+  assert.equal(t.xp, Math.round(r.xp * 1.5));
+  assert.equal(t.coins, Math.round(r.coins * 1.5));
 });

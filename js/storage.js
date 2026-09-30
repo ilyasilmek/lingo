@@ -16,6 +16,7 @@ const defaults = () => ({
   sound: true,
   haptics: true,
   hardMode: false,
+  timedClassic: false, // Süreli Klasik: her tahmine süre; yeni klasik oyunlarda geçerli
   reminder: false,
   reminderTime: '20:00',
   freezes: 0, // seri koruyucu adedi
