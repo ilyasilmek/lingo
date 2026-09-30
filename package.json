@@ -1,22 +1,26 @@
 {
-  "name": "lingo-mobile",
-  "version": "1.54.2",
+  "name": "lingo",
+  "version": "1.0.0",
   "private": true,
-  "description": "Çevrimdışı Türkçe Lingo — Android ve mobil web",
+  "description": "Türkçe beş harfli kelime tahmin oyunu",
+  "type": "module",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js",
-    "build": "node --check server.js && node --check app.js && node --check mobile/app.js && node --check mobile/engine.js && node --check words.js",
-    "lint": "node --check server.js && node --check app.js && node --check mobile/app.js && node --check mobile/engine.js && node --check words.js",
-    "test": "node --test tests/engine.test.cjs",
-    "test:ui": "node tests/ui.test.cjs",
-    "android:build": "cd android && ./gradlew assembleDebug bundleRelease lintRelease"
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.js",
+    "build:words": "node scripts/build-words.mjs",
+    "build:web": "node scripts/build-web.mjs",
+    "android:sync": "npm run build:web && npx cap sync android"
   },
   "devDependencies": {
-    "@playwright/test": "1.55.1"
+    "@capacitor/cli": "^8.5.2",
+    "an-array-of-turkish-words": "1.2.0",
+    "wrangler": "^4.143.1"
   },
-  "displayVersion": "1.54.02",
+  "license": "MIT",
   "dependencies": {
-    "tesseract.js": "^7.0.0"
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/local-notifications": "^8.3.1"
   }
 }

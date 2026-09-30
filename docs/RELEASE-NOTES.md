@@ -1,13 +1,13 @@
-# Lingo 1.54.02
+# Lingo 1.54.03
 
-- Yeni mor, turkuaz ve mercan renk paleti; daha canlı açık/koyu temalar.
-- Açık ve koyu temalarda yüksek kontrastlı, okunaklı klavye butonları.
-- Otomatik kapanan, atlanabilir animasyonlu açılış ekranı.
-- Hareketli ana sayfa harfleri, kart geçişleri, dokunma tepkileri ve parlayan butonlar.
-- Harf girişinde sıçrama, kazanılan satırda dalga ve renkli kutlama efektleri.
-- Hareket azaltma tercihi açıkken animasyonlar ve açılış beklemesi kaldırılır.
-- Paket adı: `com.stitchilyas.lingo`. Android sürüm adı: `1.54.02`.
+Uygulama baştan yazıldı. Öne çıkan yenilikler:
 
-**İndirme:** `debug.apk` telefona kurulabilir test sürümüdür. `unsigned.aab` derlenmiş release paketidir; Google Play için kendi yükleme anahtarınızla imzalamanız gerekir. Depoda imzalama sırları varsa `release.apk` ve `signed.aab` de üretilir. Ayrıntılar: BUILD-NOTES.md.
+- Kelimeler TDK Güncel Türkçe Sözlük'ten geliyor. 4 ile 9 harf arasında uzunluk seçilebiliyor.
+- Kelimenin ilk harfi her zaman açık geliyor. Oyun bitince kelimenin anlamı gösteriliyor.
+- Günün Kelimesi, Klasik ve Zamana Karşı modları var. Geçmiş 60 günün kelimeleri arşivden oynanabiliyor.
+- Seri koruyucu, zor mod, 12 rozet ve kelime uzunluğuna göre istatistik eklendi.
+- Günlük hatırlatma bildirimi, oyun sesleri ve titreşim ayarları eklendi.
+- İsteğe bağlı skor tablosu: bugün, bu hafta, bu ay ve tüm zamanlar.
+- Paket adı: `com.stitchilyas.lingo`. Sürüm adı: `1.54.03`.
 
-Farklı CI çalıştırmalarının debug anahtarları değişebilir; eski test APK'sını kaldırmak gerekebilir. Kalıcı dağıtım için release imzalama yapılandırmasını kullanın.
+**İndirme:** `debug.apk` telefona doğrudan kurulabilen test sürümüdür. `release.apk` ve `release.aab` yükleme anahtarıyla imzalıdır, Google Play'e `release.aab` yüklenir. İmza secrets tanımlı değilse dosya adlarında `release-unsigned` yazar.

@@ -1,0 +1,8 @@
+{
+  "appId": "com.stitchilyas.lingo",
+  "appName": "Lingo",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#f8f9ff"
+  }
+}
