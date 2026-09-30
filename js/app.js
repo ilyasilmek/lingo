@@ -319,15 +319,20 @@ function bindNameTaken() {
   });
 }
 
-// Klasik mod: yarım kalan oyun varsa önce sorar.
-async function openClassic() {
+// Klasik mod: yarım kalan oyun varsa önce sorar. hard: yeni oyun, ayardan bağımsız zor modda başlar.
+let forceHard = false;
+async function openClassic({ hard = false } = {}) {
+  const startNew = () => {
+    forceHard = hard;
+    go('#/oyna/klasik');
+  };
   const saved = getProfile().classic;
-  if (!saved) return go('#/oyna/klasik');
+  if (!saved) return startNew();
   const n = len(saved.answer);
-  // Hiç tahmin yapılmamış oyunda kaybedilecek bir şey yok; uzunluk değiştiyse sormadan yenisi açılır.
-  if (!saved.guesses.length && n !== selectedLength()) {
+  // Hiç tahmin yapılmamış oyunda kaybedilecek bir şey yok; uzunluk ya da zorluk değiştiyse sormadan yenisi açılır.
+  if (!saved.guesses.length && (n !== selectedLength() || (hard && !saved.hard))) {
     abandonClassic();
-    return go('#/oyna/klasik');
+    return startNew();
   }
   const choice = await dialog({
     title: 'Oyuna devam etmek ister misiniz?',
@@ -341,7 +346,7 @@ async function openClassic() {
   if (choice === 'continue') go('#/oyna/klasik');
   else if (choice === 'new') {
     abandonClassic();
-    go('#/oyna/klasik');
+    startNew();
   }
 }
 
@@ -403,7 +408,7 @@ function bindCommon() {
   app.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
   app.querySelectorAll('[data-classic]').forEach((b) => b.addEventListener('click', (e) => {
     e.preventDefault();
-    openClassic();
+    openClassic({ hard: b.dataset.classic === 'hard' });
   }));
 }
 
@@ -425,29 +430,50 @@ function renderHome() {
   const d = getDayRecord(dayKey());
   const dailyDone = d?.finished;
   const winRate = p.played ? Math.round((p.wins / p.played) * 100) : 0;
-  const base = scoreRound({ attempts: 3, seconds: 60 });
   const saved = p.classic;
 
   app.innerHTML = `
   ${headerHome(p)}
   <main class="page">
-    <section class="card hero" aria-labelledby="daily-title">
+    <section class="card hero tint tint-sky" aria-labelledby="classic-title">
       <div class="section-head">
-        <span class="badge primary">${icon('bolt', 'fill')}Günün kelimesi</span>
-        <span class="countdown">${icon('timer')}<span id="midnight">${hms(msUntilMidnight())}</span> kaldı</span>
+        <span class="badge tint-chip sky-ink">${icon('spellcheck')}Klasik oyun</span>
+        <span class="badge">Seviye ${levelFor(p.xp)}</span>
       </div>
-      <h2 id="daily-title">Günün Şifresini Çöz</h2>
-      <p>Herkes aynı ${DAILY_LENGTH} harfli kelimeyi arıyor. İlk harf senden, gerisi 6 denemede. Ödül iki katı.</p>
-      <div class="mini-tiles" aria-hidden="true">
-        <span class="correct">L</span><span class="absent">İ</span><span class="present">N</span><span class="absent">G</span><span class="correct">O</span>
+      <h2 id="classic-title">Kelimeyi Bul</h2>
+      <p>${saved
+        ? `Yarım kalan ${len(saved.answer)} harfli ${saved.hard ? 'zor ' : ''}${saved.timed ? 'süreli ' : ''}oyunun seni bekliyor (${saved.guesses.length}/${MAX_GUESSES} tahmin).`
+        : p.timedClassic
+          ? `İlk harf senden, gerisi ${MAX_GUESSES} tahminde. Her tahmine ${TIMED_TURN_SECONDS} saniye.`
+          : `İlk harf senden, gerisi ${MAX_GUESSES} tahminde. Süre yok, acele etme.`}</p>
+      <div class="length-picker">
+        <span id="length-label" class="small sky-ink">KELİME UZUNLUĞU</span>
+        <div class="length-options" role="radiogroup" aria-labelledby="length-label">
+          ${Array.from({ length: MAX_LENGTH - MIN_LENGTH + 1 }, (_, i) => MIN_LENGTH + i).map((k) => `
+            <button role="radio" aria-checked="${k === n}" data-length="${k}">${k}</button>`).join('')}
+        </div>
+        <div class="timed-row">
+          <div><label for="timed-toggle">${icon('timer')}Süreli Klasik</label><small>Her tahmine ${TIMED_TURN_SECONDS} saniye, süre dolarsa hak yanar. Ödül +%50.</small></div>
+          <button class="switch" id="timed-toggle" role="switch" aria-checked="${!!p.timedClassic}"><span></span></button>
+        </div>
       </div>
-      <div class="reward-row">
-        <span>${icon('stars', 'fill')} ~${fmt(base.xp * DAILY_REWARD_FACTOR)} XP · ${base.coins * DAILY_REWARD_FACTOR} Coin</span>
-        <span class="badge solid">Ödül x${DAILY_REWARD_FACTOR}</span>
-      </div>
-      ${dailyDone
-        ? `<button class="btn btn-soft btn-block" data-go="#/oyna/gunluk">${icon('task_alt')}${d.won ? `Bugün ${d.guesses.length}. denemede bildin` : 'Bugünkü kelime kaçtı'} · Sonucu Gör</button>`
-        : `<button class="btn btn-primary btn-block" data-go="#/oyna/gunluk">${icon('play_arrow', 'fill')}${d?.guesses?.length ? 'DEVAM ET' : 'HEMEN OYNA'}</button>`}
+      <button class="btn btn-primary btn-block" data-classic>${icon('play_arrow', 'fill')}${saved ? 'DEVAM ET' : `YENİ OYUN · ${n} HARF`}</button>
+    </section>
+
+    <section class="card daily-strip" aria-labelledby="daily-title">
+      <button class="daily-main" data-go="#/oyna/gunluk">
+        <span class="dot primary">${icon(dailyDone ? 'task_alt' : 'bolt', 'fill')}</span>
+        <div>
+          <strong id="daily-title">Günün Kelimesi</strong>
+          <small>${dailyDone
+            ? (d.won ? `Bugün ${d.guesses.length}. denemede bildin` : 'Bugünkü kelime kaçtı')
+            : d?.guesses?.length
+              ? `Yarım kaldı, ${d.guesses.length}/${MAX_GUESSES} tahmin`
+              : `Herkes aynı ${DAILY_LENGTH} harfli kelimeyi arıyor · Ödül x${DAILY_REWARD_FACTOR}`}</small>
+        </div>
+        <span class="countdown">${icon('timer')}<span id="midnight">${hms(msUntilMidnight())}</span></span>
+        ${icon('chevron_right')}
+      </button>
       <button class="link-btn ${dailyDone ? '' : 'muted-link'}" data-go="#/arsiv">${icon(dailyDone ? 'history' : 'lock')}${dailyDone ? 'Geçmiş günlerin kelimeleri' : 'Arşiv, bugünü tamamlayınca açılır'} ${icon('chevron_right')}</button>
     </section>
 
@@ -465,30 +491,14 @@ function renderHome() {
 
     <section aria-labelledby="modes-title" style="display:flex;flex-direction:column;gap:10px">
       <div class="section-head">
-        <h2 id="modes-title">Oyun Modları</h2>
-        <span class="badge">Seviye ${levelFor(p.xp)}</span>
-      </div>
-      <div class="card tight length-picker tint tint-lilac">
-        <span id="length-label" class="small lilac-ink">KELİME UZUNLUĞU</span>
-        <div class="length-options" role="radiogroup" aria-labelledby="length-label">
-          ${Array.from({ length: MAX_LENGTH - MIN_LENGTH + 1 }, (_, i) => MIN_LENGTH + i).map((k) => `
-            <button role="radio" aria-checked="${k === n}" data-length="${k}">${k}</button>`).join('')}
-        </div>
-        <div class="timed-row">
-          <div><label for="timed-toggle">${icon('timer')}Süreli Klasik</label><small>Her tahmine ${TIMED_TURN_SECONDS} saniye, süre dolarsa hak yanar. Ödül +%50.</small></div>
-          <button class="switch" id="timed-toggle" role="switch" aria-checked="${!!p.timedClassic}"><span></span></button>
-        </div>
+        <h2 id="modes-title">Diğer Modlar</h2>
       </div>
       <div class="modes">
-        <button class="mode tint tint-sky" data-classic>
-          <div class="mode-top"><span class="mode-icon dot sky-ink">${icon('spellcheck')}</span><span class="badge tint-chip sky-ink">${saved ? 'Yarım kaldı' : p.timedClassic ? 'Süreli' : 'Stratejik'}</span></div>
-          <h3>Klasik ${n} Harf</h3>
-          <p>${saved
-            ? `${len(saved.answer)} harfli ${saved.timed ? 'süreli ' : ''}oyunun seni bekliyor.`
-            : p.timedClassic
-              ? `6 tahmin hakkı, her tahmine ${TIMED_TURN_SECONDS} saniye. İlk harf açık gelir.`
-              : '6 tahmin hakkı, süre yok. İlk harf açık gelir.'}</p>
-          <span class="mode-cta sky-ink">${saved ? 'Devam Et' : 'Hemen Başla'} ${icon('arrow_forward')}</span>
+        <button class="mode tint tint-amber" data-classic="hard">
+          <div class="mode-top"><span class="mode-icon dot amber-ink">${icon('fitness_center')}</span><span class="badge tint-chip amber-ink">Zorlu</span></div>
+          <h3>Zor Mod</h3>
+          <p>${n} harfli kelime. Bulduğun harfleri sonraki tahminlerde kullanmak zorunlu.</p>
+          <span class="mode-cta amber-ink">Hemen Başla ${icon('arrow_forward')}</span>
         </button>
         <button class="mode tint tint-rose" data-go="#/oyna/zaman">
           <div class="mode-top"><span class="mode-icon dot rose-ink">${icon('timer')}</span><span class="badge tint-chip rose-ink">Turbo hız</span></div>
@@ -625,6 +635,8 @@ async function newSession(mode, arg) {
     });
   }
   // Klasik: kayıtlı yarım oyun varsa ondan devam edilir.
+  const hard = forceHard;
+  forceHard = false;
   const saved = p.classic;
   if (saved) {
     const words = await loadWords(len(saved.answer));
@@ -638,6 +650,7 @@ async function newSession(mode, arg) {
   const s = baseSession(mode, randomFrom(words.answers), words);
   s.label = `Klasik #${p.classicCount + 1}`;
   s.timed = !!p.timedClassic;
+  if (hard) s.hard = true;
   updateProfile({ classicCount: p.classicCount + 1 });
   saveProgress(s);
   return s;
