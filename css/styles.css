@@ -629,6 +629,18 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 :root[data-theme='dark'] .sky-ink { color: #8fb6f2; }
 :root[data-theme='dark'] .rose-ink { color: #f19ab7; }
 .badge.tint-chip { background: var(--tint-dot); }
+.amber-ink { color: #9a5b00; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .amber-ink { color: #f2c26b; } }
+:root[data-theme='dark'] .amber-ink { color: #f2c26b; }
+.daily-strip { display: flex; flex-direction: column; gap: 2px; padding: 8px; }
+.daily-main { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px; border-radius: 12px; text-align: left; color: inherit; }
+.daily-main:hover { background: var(--surface-low); }
+.daily-main > div { flex: 1; min-width: 0; }
+.daily-main strong { display: block; font-size: 16px; line-height: 22px; }
+.daily-main small { display: block; color: var(--text-2); font-size: 13px; line-height: 18px; }
+.daily-main .dot { flex: none; width: 40px; height: 40px; border-radius: 999px; display: flex; align-items: center; justify-content: center; }
+.daily-main .countdown { flex: none; font-size: 13px; }
+.daily-strip .link-btn { align-self: center; }
 
 /* Sonuç ekranı: altta sabit eylem çubuğu */
 .page.has-actions { padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
@@ -779,3 +791,4 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .board-row.top-2 .board-rank { color: #8b9bb0; }
 .board-row.top-3 .board-rank { color: #b8733b; }
 .board-row.self { background: var(--tint-lilac-bg); border: 1.5px solid var(--tint-lilac-bd); }
+@media (max-width: 359px) { .daily-main .countdown { display: none; } }

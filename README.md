@@ -39,7 +39,7 @@ Takıldığında ampul simgesine basıp bir harf açtırabilirsin. İpucu 4. tah
 
 **Rozetler.** İlk zafer, ilk denemede bilmek, 7 ve 30 günlük seri, 9 harfli kelime, zor modda galibiyet gibi 12 hedef var. Her rozet açıldığında coin ödülü verir. İlerlemeni İstatistikler sayfasındaki Rozetler bölümünden görebilirsin.
 
-**Zor mod.** Açıkken, doğru yerde bulduğun harfleri yerinde tutman ve kelimede olduğunu öğrendiğin harfleri sonraki tahminlerde kullanman gerekir. Yeni başlayan oyunlarda geçerli olur.
+**Zor mod.** Ana sayfadaki Zor Mod kartı, klasik bir oyunu doğrudan zor modda başlatır. Profil sayfasındaki ayarı açarsan bütün yeni oyunlar zor modda başlar. Zor modda, doğru yerde bulduğun harfleri yerinde tutman ve kelimede olduğunu öğrendiğin harfleri sonraki tahminlerde kullanman gerekir.
 
 **Günlük hatırlatma.** Android uygulamasında, günün kelimesini çözmediysen seçtiğin saatte bildirim gelir. Kelimeyi çözdüğün gün bildirim gönderilmez.
 
@@ -66,8 +66,8 @@ Takıldığında ampul simgesine basıp bir harf açtırabilirsin. İpucu 4. tah
 <table>
   <tr>
     <td align="center" width="33%"><img src="docs/ekranlar/11-hos-geldin.png" width="200" alt="İlk açılışta oyuncu adı"><br>İlk açılışta oyuncu adı</td>
-    <td align="center" width="33%"><img src="docs/ekranlar/01-ana-sayfa.png" width="200" alt="Ana sayfa ve günün kelimesi"><br>Ana sayfa ve günün kelimesi</td>
-    <td align="center" width="33%"><img src="docs/ekranlar/02-oyun-modlari.png" width="200" alt="Kelime uzunluğu ve oyun modları"><br>Kelime uzunluğu ve oyun modları</td>
+    <td align="center" width="33%"><img src="docs/ekranlar/01-ana-sayfa.png" width="200" alt="Ana sayfa ve klasik oyun"><br>Ana sayfa ve klasik oyun</td>
+    <td align="center" width="33%"><img src="docs/ekranlar/02-oyun-modlari.png" width="200" alt="Zor Mod ve Zamana Karşı"><br>Zor Mod ve Zamana Karşı</td>
   </tr>
   <tr>
     <td align="center" width="33%"><img src="docs/ekranlar/03-oyun-alani.png" width="200" alt="5 harfli oyun, üçüncü tahmin"><br>5 harfli oyun, üçüncü tahmin</td>
