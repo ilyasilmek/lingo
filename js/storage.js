@@ -10,6 +10,7 @@ const KEY = 'lingo:v1';
 const defaults = () => ({
   name: 'Oyuncu',
   nameSet: false, // ilk açılışta ad sorulana kadar false
+  playerDeleted: false, // sunucudaki kayıt yönetici tarafından silindi; yeni ad seçilene kadar sessizce yeniden kaydolunmaz
   nameClaimed: false, // ad sunucuda bu oyuncuya ayrıldı mı; çevrimdışı girilen ad sonraki açılışta ayrılır
   nameChangedAt: 0, // son ad değişikliğindeki gamesTotal değeri
   gamesTotal: 0, // biten tüm oyunlar (Zamana Karşı turları dahil)
