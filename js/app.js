@@ -200,7 +200,7 @@ async function ensureName() {
   askingName = true;
   const name = await nameDialog({
     title: 'Hoş geldin!',
-    body: 'Başlamadan önce sana nasıl hitap edelim? Her ad tek bir oyuncuya aittir; başka biri kullanıyorsa farklı bir ad seçmen istenir.',
+    body: 'Başlamadan önce sana nasıl hitap edelim? Bu ad, günün kelimesi skor tablosunda puanınla birlikte diğer oyunculara görünür; gerçek adını yazmak zorunda değilsin. Her ad tek bir oyuncuya aittir.',
     confirmLabel: 'Başla',
     required: true,
     check: leaderboardReady() ? async (n) => {
@@ -222,7 +222,7 @@ async function askNameAfterDeletion() {
   askingName = true;
   const name = await nameDialog({
     title: 'Oyuncu kaydın silindi',
-    body: 'Sunucudaki oyuncu kaydın ve skor tablosundaki skorların silindi. Bu cihazdaki serin, istatistiklerin ve geçmiş günlerin duruyor. Devam etmek için bir ad seç; boştaysa aynı adı yeniden seçebilirsin.',
+    body: 'Sunucudaki oyuncu kaydın ve skor tablosundaki skorların silindi, skor tablosundan da çıkarıldın. Bu cihazdaki serin, istatistiklerin ve geçmiş günlerin duruyor. Devam etmek için bir ad seç; boştaysa aynı adı yeniden seçebilirsin. İstersen Profil sayfasındaki "Skor tablosunda görün" ayarından tabloya yeniden katılabilirsin.',
     initial: getProfile().name,
     confirmLabel: 'Devam',
     required: true,
@@ -1322,26 +1322,11 @@ function renderResult() {
   if (r.mode === 'daily' && !r.alreadyRecorded) offerLeaderboard(r);
 }
 
-// Günün kelimesi bitince skor tablosuna gönderir; ilk seferde oyuncuya sorar.
+// Günün kelimesi bitince skor tablosuna gönderir. Katılım varsayılan olarak açıktır;
+// oyuncu ad girerken bilgilendirilir ve Profil'den kapatabilir.
 async function offerLeaderboard(r) {
   if (!leaderboardReady()) return;
-  const token = renderToken;
   const payload = { day: r.day, guesses: r.guesses, hints: r.hints, seconds: r.seconds };
-  if (getProfile().leaderboard === null) {
-    await new Promise((res) => setTimeout(res, 1600));
-    if (token !== renderToken) return;
-    const yes = await dialog({
-      title: 'Skor tablosuna katıl?',
-      body: `Günün kelimesi skorların, <b>${esc(getProfile().name)}</b> adıyla diğer oyuncuların da gördüğü skor tablosunda yer alsın mı? Yalnızca adın ve puanın paylaşılır. Bu tercihi Profil sayfasından değiştirebilirsin.`,
-      actions: [
-        { label: `${icon('leaderboard')}Evet, katıl`, value: true, primary: true },
-        { label: 'Hayır, şimdilik değil', value: false },
-      ],
-    });
-    if (yes === null) return;
-    if (!yes) return updateProfile({ leaderboard: false });
-    if (!(await joinBoard())) return;
-  }
   if (getProfile().leaderboard !== true) return;
   let res = await submitDaily(payload);
   if (!res && getProfile().boardNameTaken) {
@@ -1682,7 +1667,7 @@ function renderProfile() {
       <h2 style="font-size:18px">Ayarlar</h2>
       ${toggle('sound-toggle', 'Oyun sesleri', 'Tuş, kazanma ve kaybetme sesleri', p.sound)}
       ${toggle('haptics-toggle', 'Titreşim', 'Harflere basınca hafif titreşim', p.haptics)}
-      ${toggle('board-toggle', 'Skor tablosunda görün', leaderboardReady() ? 'Günün kelimesi skorların adınla birlikte paylaşılır.' : 'Skor tablosu henüz hazır değil.', p.leaderboard === true && leaderboardReady(), !leaderboardReady())}
+      ${toggle('board-toggle', 'Skor tablosunda görün', leaderboardReady() ? 'Günün kelimesi skorların adınla birlikte paylaşılır. Kapatırsan yeni skorların gönderilmez.' : 'Skor tablosu henüz hazır değil.', p.leaderboard === true && leaderboardReady(), !leaderboardReady())}
       ${toggle('hard-toggle', 'Zor mod', 'Bulunan harfleri sonraki tahminlerde kullanmak zorunlu. Yeni oyunlardan itibaren geçerli.', p.hardMode)}
       ${toggle('reminder-toggle', 'Günlük hatırlatma', canRemind ? 'Günün kelimesini çözmediysen seçtiğin saatte bildirim gelir.' : 'Yalnızca Android uygulamasında çalışır.', p.reminder && canRemind, !canRemind)}
       ${canRemind && p.reminder ? `
