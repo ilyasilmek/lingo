@@ -30,7 +30,7 @@ const defaults = () => ({
   archiveWins: 0,
   timeAttackMaxWords: 0,
   history: {}, // gün -> günlük kelime kaydı (bugün ve arşiv)
-  leaderboard: null, // skor tablosuna katılım: null (sorulmadı), true, false
+  leaderboard: true, // skor tablosuna katılım; Profil'den kapatılabilir (false)
   playerId: null, // skor tablosu için cihaz kimliği
   playerSecret: null,
   scoreQueue: [], // gönderilmeyi bekleyen günlük skorlar
@@ -64,6 +64,9 @@ function read() {
       saved.history = { ...(saved.history || {}), [day]: rec };
     }
     delete saved.daily;
+    // Eski sürümler katılımı ilk günlük oyundan sonra soruyordu. Hiç sorulmamış olanlar (null)
+    // artık varsayılan olarak katılır; daha önce "Hayır" diyenlerin (false) kararı korunur.
+    if (saved.leaderboard === null) saved.leaderboard = true;
     return { ...defaults(), ...saved };
   } catch {
     return defaults();

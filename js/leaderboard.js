@@ -92,8 +92,8 @@ export async function syncName() {
 }
 
 // Sunucudaki kaydın hâlâ durup durmadığını sorar; kayıt oluşturmaz.
-// Kayıt silinmişse cihazdaki kayıt bilgisi sıfırlanır, skor tablosu katılımı yeniden sorulur
-// ve bekleyen skorlar atılır. Cihazdaki seri, istatistik ve geçmiş günler olduğu gibi kalır.
+// Kayıt silinmişse cihazdaki kayıt bilgisi sıfırlanır, oyuncu skor tablosundan çıkarılır (Profil'den
+// yeniden katılabilir) ve bekleyen skorlar atılır. Cihazdaki seri, istatistik ve geçmiş günler olduğu gibi kalır.
 // Sonuç: 'exists' | 'deleted' | null (kayıt yok sayılmıyor ya da sunucuya ulaşılamadı)
 export async function checkPlayer() {
   const p = getProfile();
@@ -104,7 +104,7 @@ export async function checkPlayer() {
   } catch {
     return null;
   }
-  updateProfile({ playerDeleted: true, nameClaimed: false, boardNameTaken: false, leaderboard: null, scoreQueue: [] });
+  updateProfile({ playerDeleted: true, nameClaimed: false, boardNameTaken: false, leaderboard: false, scoreQueue: [] });
   return 'deleted';
 }
 
