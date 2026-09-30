@@ -20,81 +20,70 @@
       border-radius: 12px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
-    h1 {
-      color: #1a202c;
-      border-bottom: 2px solid #edf2f7;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-    }
-    h2 {
-      color: #2b6cb0;
-      margin-top: 24px;
-      font-size: 1.25rem;
-    }
-    p, li {
-      font-size: 0.98rem;
-    }
-    ul {
-      padding-left: 20px;
-    }
-    .date {
-      color: #718096;
-      font-size: 0.88rem;
-      margin-bottom: 20px;
-    }
-    .badge {
-      display: inline-block;
-      background: #e2e8f0;
-      color: #4a5568;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
+    h1 { color: #1a202c; border-bottom: 2px solid #edf2f7; padding-bottom: 12px; margin-bottom: 20px; }
+    h2 { color: #2b6cb0; margin-top: 24px; font-size: 1.25rem; }
+    p, li { font-size: 0.98rem; }
+    ul { padding-left: 20px; }
+    .date { color: #718096; font-size: 0.88rem; margin-bottom: 20px; }
+    @media (max-width: 480px) { body { padding: 12px; } .container { padding: 20px; } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Lingo — Gizlilik Politikası</h1>
-    <div class="date">Son Güncelleme: 23 Eylül 2026</div>
+<div class="container">
+<h1>Lingo — Gizlilik Politikası</h1>
+<div class="date">Son güncelleme: 30 Eylül 2026</div>
 
-    <p>Bu Gizlilik Politikası, <strong>İlyas İlmek</strong> tarafından geliştirilen <strong>Lingo</strong> ("Uygulama") mobil uygulaması için geçerlidir. Bu metin, kullanıcılarımızın gizliliğini koruma taahhüdümüzü ve verilerin nasıl ele alındığını açıklamaktadır.</p>
+<p>Bu gizlilik politikası, İlyas İlmek tarafından geliştirilen Lingo mobil uygulaması ve web sürümü için geçerlidir.</p>
 
-    <h2>1. Toplanan Kişisel Veriler</h2>
-    <p><strong>Lingo, hiçbir kişisel veri toplamaz, işlemez veya harici sunuculara iletmez.</strong></p>
-    <ul>
-      <li>Adınız, e-posta adresiniz veya telefon numaranız istenmez.</li>
-      <li>Hesap oluşturma veya giriş yapma zorunluluğu yoktur.</li>
-      <li>Konum bilgisi, rehber, kamera veya mikrofon gibi hassas izinler talep edilmez.</li>
-    </ul>
+<h2>1. Cihazında saklanan veriler</h2>
+<p>Oyunun büyük bölümü internet bağlantısı olmadan çalışır. Aşağıdaki veriler yalnızca cihazının kendi hafızasında tutulur ve hiçbir yere gönderilmez:</p>
+<ul>
+  <li>Yarım kalan oyunlar, geçmiş günlerin sonuçları</li>
+  <li>XP, coin, seri, rozetler ve istatistikler</li>
+  <li>Tema, ses, titreşim, zor mod ve hatırlatma ayarları</li>
+</ul>
+<p>Profil sayfasındaki "Tüm verileri sıfırla" düğmesi bu verileri siler. Uygulamayı kaldırdığında da hepsi cihazdan silinir.</p>
 
-    <h2>2. Cihaz İçi Yerel Depolama (Local Storage)</h2>
-    <p>Lingo, tamamen cihazınızda çalışan çevrimdışı bir kelime oyunudur. Oyun deneyimini kesintisiz sürdürebilmeniz için yalnızca aşağıdaki veriler <strong>cihazınızın kendi hafızasında (yerel olarak)</strong> tutulur:</p>
-    <ul>
-      <li>Yarım kalan oyun durumu (tahminleriniz ve harf kutuları)</li>
-      <li>Kazanılan puanlar, seri sayıları ve oyun istatistikleri</li>
-      <li>Seçilen tema (açık/koyu mod) ve ses/titreşim tercihleri</li>
-    </ul>
-    <p>Bu veriler hiçbir zaman harici bir sunucuya aktarılmaz, üçüncü şahıslarla paylaşılmaz veya analiz şirketlerine gönderilmez. Uygulamayı sildiğinizde veya uygulama verilerini temizlediğinizde tüm bu veriler cihazınızdan kalıcı olarak silinir.</p>
+<h2>2. Sunucuya gönderilen veriler</h2>
+<p>Her oyuncu adı tek bir oyuncuya ait olsun diye, ilk açılışta girdiğin ve sonradan değiştirdiğin oyuncu adı sunucuda sana ayrılır. Bunun için şunlar gönderilir:</p>
+<ul>
+  <li>Oyuncu adın.</li>
+  <li>Uygulamanın rastgele ürettiği bir oyuncu kimliği ve gizli bir anahtar. Bunlar telefonunun donanım kimliği, reklam kimliği ya da telefon numarası değildir. Sunucu gizli anahtarın kendisini değil, geri çözülemeyen bir özetini saklar.</li>
+</ul>
+<p>Skor tablosuna katılmazsan adın başka oyunculara gösterilmez ve sunucuya skor gönderilmez.</p>
+<p><strong>Skor tablosu (isteğe bağlı).</strong> Günün kelimesini bitirdiğinde uygulama skor tablosuna katılmak isteyip istemediğini sorar. Katılırsan adın ve puanın diğer oyunculara görünür. Her günün kelimesi için yaptığın tahminler, oyun süresi ve kullandığın ipucu sayısı gönderilir. Sunucu puanını bunlarla hesaplar ama tahminleri saklamaz. Saklanan bilgiler gün, kazanıp kazanmadığın, deneme sayısı, süre, ipucu sayısı ve puandır. Skor tablosundan Profil sayfasındaki "Skor tablosunda görün" ayarıyla istediğin zaman ayrılabilirsin. Ayrıldıktan sonra yeni skor gönderilmez.</p>
+<p>E-posta, konum, rehber, fotoğraf ya da başka bir kişisel bilgi istenmez.</p>
+<p>Sunucu Cloudflare altyapısında (Cloudflare Workers ve D1 veritabanı) çalışır ve veriler Cloudflare'in yurt dışındaki veri merkezlerinde saklanır. Cloudflare bu hizmeti sağlarken kendi gizlilik politikası kapsamında teknik bağlantı kayıtları tutabilir.</p>
+<p>Uygunsuz oyuncu adları geliştirici tarafından skor tablosundan gizlenebilir.</p>
 
-    <h2>3. Çocukların Gizliliği</h2>
-    <p>Lingo her yaştan kullanıcı için güvenlidir ve aile dostudur. Uygulama bilerek 13 yaşın (veya ilgili yargı alanındaki geçerli yaşın) altındaki çocuklardan kişisel olarak tanımlanabilir herhangi bir bilgi toplamaz.</p>
+<h2>3. Verilerinin silinmesi</h2>
+<p>Sunucudaki adını ve skorlarını sildirmek istersen aşağıdaki e-posta adresine yaz. Kaydını bulabilmemiz için e-postada oyuncu adını belirtmen yeterli. Kayıtların en geç 30 gün içinde silinir. Silme talebi olmadıkça bu kayıtlar hizmet sürdüğü sürece saklanır.</p>
 
-    <h2>4. Üçüncü Taraf Hizmetleri ve Reklamlar</h2>
-    <p>Uygulama içerisinde kullanıcıları takip eden üçüncü taraf analiz (analytics) izleyicileri veya kullanıcı profili oluşturan reklam ağları yer almamaktadır.</p>
+<h2>4. Bildirimler</h2>
+<p>Günlük hatırlatmayı açarsan bildirimler telefonunda yerel olarak kurulur. Bunun için bir sunucu kullanılmaz ve hiçbir veri gönderilmez.</p>
 
-    <h2>5. İzinler</h2>
-    <p>Uygulama yalnızca temel işlevsellik için gereken minimum izinleri kullanır (örneğin harf girişlerinde dokunma tepkisi vermek için isteğe bağlı titreşim geri bildirimi). Cihazınızdaki hiçbir hassas veriye veya donanıma izinsiz erişilmez.</p>
+<h2>5. İzinler</h2>
+<ul>
+  <li><strong>İnternet:</strong> yalnızca oyuncu adını ayırmak ve skor tablosu için kullanılır.</li>
+  <li><strong>Bildirim:</strong> günlük hatırlatma için kullanılır. İstersen açarsın.</li>
+  <li><strong>Açılışta çalışma:</strong> telefon yeniden başlatılınca kurulu hatırlatmaların kaybolmaması için kullanılır.</li>
+  <li><strong>Titreşim:</strong> tuşlara basınca hafif titreşim için kullanılır. Ayarlardan kapatılabilir.</li>
+</ul>
 
-    <h2>6. Değişiklikler</h2>
-    <p>Gizlilik Politikamız zaman zaman güncellenebilir. Herhangi bir değişiklik olması durumunda güncel metin bu sayfada yayınlanacaktır.</p>
+<h2>6. Reklam ve analiz</h2>
+<p>Uygulamada reklam yoktur. Kullanıcıları izleyen bir analiz aracı ya da üçüncü taraf SDK'sı da yoktur.</p>
 
-    <h2>7. İletişim</h2>
-    <p>Bu Gizlilik Politikası ile ilgili herhangi bir sorunuz veya geri bildiriminiz olması durumunda bizimle iletişime geçebilirsiniz:</p>
-    <ul>
-      <li><strong>Geliştirici:</strong> İlyas İlmek</li>
-      <li><strong>E-posta:</strong> ilyasilmk@gmail.com</li>
-    </ul>
-  </div>
+<h2>7. Çocuklar</h2>
+<p>Lingo her yaştan oyuncu için uygundur. Skor tablosunda gerçek adını değil, bir takma ad kullanmanı öneririz.</p>
+
+<h2>8. Değişiklikler</h2>
+<p>Bu politika değişirse güncel metin bu sayfada yayımlanır ve üstteki tarih güncellenir.</p>
+
+<h2>9. İletişim</h2>
+<ul>
+  <li><strong>Geliştirici:</strong> İlyas İlmek</li>
+  <li><strong>E-posta:</strong> ilyasilmk@gmail.com</li>
+</ul>
+</div>
 </body>
 </html>
