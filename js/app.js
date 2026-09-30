@@ -1,5 +1,6 @@
 import {
   MIN_LENGTH, MAX_LENGTH, DAILY_LENGTH, MAX_GUESSES, TIME_ATTACK_SECONDS, KEYBOARD_ROWS, STATE,
+  TIMED_TURN_SECONDS, timeoutGuess, isTimeoutGuess, timedReward,
   trUpper, isTurkishLetter, evaluateGuess, keyboardStates, knownLetters, pickHint, hintStatus, HINT_MAX, HINT_AFTER_GUESSES,
   scoreRound, streakMultiplier, dayKey, dayNumber, msUntilMidnight,
   seededShuffle, dailyIndex, leagueFor, levelFor,
@@ -450,12 +451,20 @@ function renderHome() {
           ${Array.from({ length: MAX_LENGTH - MIN_LENGTH + 1 }, (_, i) => MIN_LENGTH + i).map((k) => `
             <button role="radio" aria-checked="${k === n}" data-length="${k}">${k}</button>`).join('')}
         </div>
+        <div class="timed-row">
+          <div><label for="timed-toggle">${icon('timer')}Süreli Klasik</label><small>Her tahmine ${TIMED_TURN_SECONDS} saniye, süre dolarsa hak yanar. Ödül +%50.</small></div>
+          <button class="switch" id="timed-toggle" role="switch" aria-checked="${!!p.timedClassic}"><span></span></button>
+        </div>
       </div>
       <div class="modes">
         <button class="mode tint tint-sky" data-classic>
-          <div class="mode-top"><span class="mode-icon dot sky-ink">${icon('spellcheck')}</span><span class="badge tint-chip sky-ink">${saved ? 'Yarım kaldı' : 'Stratejik'}</span></div>
+          <div class="mode-top"><span class="mode-icon dot sky-ink">${icon('spellcheck')}</span><span class="badge tint-chip sky-ink">${saved ? 'Yarım kaldı' : p.timedClassic ? 'Süreli' : 'Stratejik'}</span></div>
           <h3>Klasik ${n} Harf</h3>
-          <p>${saved ? `${len(saved.answer)} harfli oyunun seni bekliyor.` : '6 tahmin hakkı, süre yok. İlk harf açık gelir.'}</p>
+          <p>${saved
+            ? `${len(saved.answer)} harfli ${saved.timed ? 'süreli ' : ''}oyunun seni bekliyor.`
+            : p.timedClassic
+              ? `6 tahmin hakkı, her tahmine ${TIMED_TURN_SECONDS} saniye. İlk harf açık gelir.`
+              : '6 tahmin hakkı, süre yok. İlk harf açık gelir.'}</p>
           <span class="mode-cta sky-ink">${saved ? 'Devam Et' : 'Hemen Başla'} ${icon('arrow_forward')}</span>
         </button>
         <button class="mode tint tint-rose" data-go="#/oyna/zaman">
@@ -487,6 +496,19 @@ function renderHome() {
     window.scrollTo(0, y);
     app.querySelector(`[data-length="${b.dataset.length}"]`)?.focus();
   }));
+  app.querySelector('#timed-toggle').addEventListener('click', () => {
+    const on = !getProfile().timedClassic;
+    updateProfile({ timedClassic: on });
+    const y = window.scrollY;
+    runCleanups();
+    renderHome();
+    window.scrollTo(0, y);
+    app.querySelector('#timed-toggle')?.focus();
+    const pending = getProfile().classic;
+    toast(on
+      ? `Süreli Klasik açık: her tahmine ${TIMED_TURN_SECONDS} saniye${pending && !pending.timed ? '. Yarım kalan oyun süresiz devam eder' : ''}`
+      : `Süreli Klasik kapalı${pending?.timed ? '. Yarım kalan oyun süreli devam eder' : ''}`, 2600);
+  });
 
   const tick = setInterval(() => {
     const left = msUntilMidnight();
@@ -523,6 +545,7 @@ function baseSession(mode, answer, words) {
     hints: [],
     freeHint: true,
     hard: !!getProfile().hardMode,
+    timed: false, // Süreli Klasik
     finished: false,
     won: false,
     busy: false,
@@ -584,14 +607,28 @@ async function newSession(mode, arg) {
     const words = await loadWords(len(saved.answer));
     const s = restore(baseSession(mode, saved.answer, words), saved);
     s.label = saved.label;
+    s.timed = !!saved.timed;
+    s.turnLeft = saved.turnLeft;
     return s;
   }
   const words = await loadWords(selectedLength());
   const s = baseSession(mode, randomFrom(words.answers), words);
   s.label = `Klasik #${p.classicCount + 1}`;
+  s.timed = !!p.timedClassic;
   updateProfile({ classicCount: p.classicCount + 1 });
   saveProgress(s);
   return s;
+}
+
+// Süreli Klasik: o anki tahmin için kalan süre.
+function turnLeftSeconds(s = session) {
+  return s.turnDeadline ? (s.turnDeadline - Date.now()) / 1000 : TIMED_TURN_SECONDS;
+}
+
+function resetTurnClock(seconds = TIMED_TURN_SECONDS) {
+  if (!session?.timed) return;
+  session.turnDeadline = Date.now() + seconds * 1000;
+  session.lastTick = null;
 }
 
 function elapsedSeconds(s = session) {
@@ -610,7 +647,8 @@ function saveProgress(s = session) {
   if (s.mode === 'daily' || s.mode === 'archive') {
     saveDayRecord(s.day, { ...common, hard: s.hard, finished: s.finished, won: s.won });
   } else if (s.mode === 'classic') {
-    updateProfile({ classic: s.finished ? null : { ...common, hard: s.hard, label: s.label } });
+    const timed = s.timed ? { timed: true, turnLeft: Math.max(1, Math.ceil(turnLeftSeconds(s))) } : {};
+    updateProfile({ classic: s.finished ? null : { ...common, hard: s.hard, label: s.label, ...timed } });
   }
 }
 
@@ -649,6 +687,8 @@ async function renderGame(mode, arg) {
   }
   session.startedAt = Date.now();
   startRow();
+  // Yarım bırakılan süreli oyun, kaldığı saniyeden devam eder.
+  resetTurnClock(session.turnLeft || TIMED_TURN_SECONDS);
 
   const n = session.length;
   const multiplier = streakMultiplier(currentStreak());
@@ -668,6 +708,7 @@ async function renderGame(mode, arg) {
           <span class="badge" id="round-label">${esc(session.label)}</span>
           <span class="badge mint">● ${n} Harfli</span>
           ${session.hard ? `<span class="badge amber" title="Zor mod">${icon('fitness_center')}Zor</span>` : ''}
+          ${session.timed ? `<span class="badge" title="Her tahmine ${TIMED_TURN_SECONDS} saniye">${icon('timer')}Süreli</span>` : ''}
         </div>
         <div>
           ${mode === 'time'
@@ -752,8 +793,14 @@ function paintBoard({ restore = false } = {}) {
     tiles.forEach((tile, c) => {
       const front = tile.querySelector('.front');
       const back = tile.querySelector('.back');
-      tile.classList.remove('filled', 'active-row', 'hinted', 'cursor', 'locked');
-      if (done) {
+      tile.classList.remove('filled', 'active-row', 'hinted', 'cursor', 'locked', 'timeout');
+      if (done && isTimeoutGuess(session.guesses[r])) {
+        front.textContent = '';
+        back.textContent = '';
+        back.className = 'face back absent';
+        tile.classList.add('timeout', 'flipped');
+        tile.setAttribute('aria-label', 'süre doldu');
+      } else if (done) {
         const ch = [...session.guesses[r]][c];
         front.textContent = ch;
         back.textContent = ch;
@@ -849,8 +896,49 @@ function updateTimer() {
     }
     paintProgress();
     if (left <= 0 && !session.finished) finishTimeAttack();
+  } else if (session.timed && !session.finished) {
+    const left = Math.max(0, turnLeftSeconds());
+    const whole = Math.ceil(left);
+    text.textContent = clock(whole);
+    timer.classList.toggle('low', left <= 10);
+    if (session.busy) return;
+    if (whole <= 5 && whole > 0 && whole !== session.lastTick) {
+      session.lastTick = whole;
+      feedback.tick();
+    }
+    if (left <= 0) onTurnTimeout();
   } else if (!session.finished) {
     text.textContent = clock(elapsedSeconds());
+  }
+}
+
+// Süreli Klasik: süre dolunca o tahmin hakkı yanar.
+function onTurnTimeout() {
+  const s = session;
+  const guess = timeoutGuess(s.length);
+  s.guesses.push(guess);
+  s.evaluations.push(evaluateGuess(guess, s.answer));
+  const lost = s.guesses.length >= MAX_GUESSES;
+  if (lost) {
+    s.finished = true;
+    s.won = false;
+    s.busy = true;
+  } else {
+    startRow();
+    resetTurnClock();
+  }
+  saveProgress();
+  paintBoard();
+  paintKeyboard();
+  paintProgress();
+  paintHint();
+  feedback.invalid();
+  if (lost) {
+    feedback.lose();
+    toast(`Süre doldu. Kelime: ${s.answer}`, 2500);
+    setTimeout(() => { if (session === s) finishRound(); }, 1400);
+  } else {
+    toast('Süre doldu, bir tahmin hakkın gitti', 2200);
   }
 }
 
@@ -946,6 +1034,7 @@ function submitGuess() {
       toast(session.answer, 2500);
       setTimeout(() => finishRound(), 1400);
     } else {
+      resetTurnClock();
       paintBoard();
     }
   }, revealMs);
@@ -990,6 +1079,7 @@ function buildResult(s, { alreadyRecorded }) {
     if (s.mode === 'daily') {
       reward = { ...reward, xp: reward.xp * DAILY_REWARD_FACTOR, coins: reward.coins * DAILY_REWARD_FACTOR };
     }
+    if (s.timed) reward = timedReward(reward);
   }
   if (!alreadyRecorded) {
     recordRound({
@@ -1011,6 +1101,7 @@ function buildResult(s, { alreadyRecorded }) {
     meanings: s.words.meanings[s.answer] || [],
     day: s.day,
     hints: s.hints.length,
+    timed: s.timed,
     reward,
     streak: currentStreak(),
     alreadyRecorded,
@@ -1174,7 +1265,8 @@ function renderResult() {
     ${r.won ? `
     <section class="card" style="display:flex;flex-direction:column;gap:12px">
       <div class="section-head"><span class="small muted" style="text-transform:uppercase">Kazanılan ödüller</span>
-        ${r.mode === 'daily' ? `<span class="badge solid">x${DAILY_REWARD_FACTOR}</span>` : ''}</div>
+        ${r.mode === 'daily' ? `<span class="badge solid">x${DAILY_REWARD_FACTOR}</span>` : ''}
+        ${r.timed ? `<span class="badge solid">${icon('timer')}Süreli +%50</span>` : ''}</div>
       <div class="kv-grid">
         <div class="kv" style="background:var(--surface-low);box-shadow:none"><span class="dot amber">${icon('paid')}</span><div><strong>+${r.reward.coins}</strong><small>Coin</small></div></div>
         <div class="kv" style="background:var(--surface-low);box-shadow:none"><span class="dot primary">${icon('local_fire_department')}</span><div><strong>${r.streak} Gün</strong><small>Seri</small></div></div>
