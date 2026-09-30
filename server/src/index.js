@@ -234,6 +234,19 @@ async function hidePlayer(request, env) {
   return json({ ok: true, changed: res.meta?.changes ?? 0 });
 }
 
+// POST /v1/sil  { id }  -> oyuncuyu ve bütün skorlarını kalıcı olarak siler (silme talepleri için).
+// Ad serbest kalır. Oyuncu uygulamada skor tablosuna katılmaya devam ederse bir sonraki skorla
+// aynı kimlikle yeniden kaydolur.
+async function deletePlayer(request, env) {
+  const body = await readJson(request);
+  if (!body || !isPlayerId(body.id)) return fail('Geçersiz istek');
+  const [scores, player] = await env.DB.batch([
+    env.DB.prepare('DELETE FROM scores WHERE player_id = ?').bind(body.id),
+    env.DB.prepare('DELETE FROM players WHERE id = ?').bind(body.id),
+  ]);
+  return json({ ok: true, deleted: (player.meta?.changes ?? 0) > 0, scores: scores.meta?.changes ?? 0 });
+}
+
 async function withAdmin(request, env, handler) {
   const auth = await adminAuth(request, env);
   if (auth.error) return fail(auth.error, auth.status);
@@ -252,6 +265,7 @@ export default {
       if (url.pathname === '/v1/yonetim/giris' && request.method === 'GET') return await withAdmin(request, env, () => json({ ok: true }));
       if (url.pathname === '/v1/yonetim/oyuncular' && request.method === 'GET') return await withAdmin(request, env, () => adminPlayers(url, env));
       if (url.pathname === '/v1/gizle' && request.method === 'POST') return await withAdmin(request, env, () => hidePlayer(request, env));
+      if (url.pathname === '/v1/sil' && request.method === 'POST') return await withAdmin(request, env, () => deletePlayer(request, env));
       if (url.pathname === '/') return json({ ok: true, service: 'lingo-skor', today: istanbulToday() });
       return fail('Bulunamadı', 404);
     } catch (e) {
