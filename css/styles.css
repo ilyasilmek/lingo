@@ -319,6 +319,14 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .dot.mint { background: var(--correct-soft); color: var(--correct-ink); }
 .dot.amber { background: var(--present-soft); color: var(--present-ink); }
 .dot.blue { background: var(--surface-high); color: var(--text); }
+.dot.rose { background: color-mix(in srgb, #e05a88 16%, var(--surface)); color: #b23a62; }
+.dot.lilac { background: color-mix(in srgb, #8b6be0 16%, var(--surface)); color: #6b4fc7; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .dot.rose { color: #f19ab7; }
+  :root:not([data-theme='light']) .dot.lilac { color: #b9a5f5; }
+}
+:root[data-theme='dark'] .dot.rose { color: #f19ab7; }
+:root[data-theme='dark'] .dot.lilac { color: #b9a5f5; }
 
 /* Mod kartları */
 .modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }

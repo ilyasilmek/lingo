@@ -478,13 +478,13 @@ function renderHome() {
     </section>
 
     <section class="stat-grid" aria-label="Özet">
-      <div class="stat tint tint-apricot"><span class="dot primary">${icon('local_fire_department')}</span><strong>${currentStreak()} Gün</strong><small>Seri${p.freezes ? ` · ${icon('shield', 'fill')}${p.freezes}` : ''}</small></div>
-      <div class="stat tint tint-mint"><span class="dot mint">${icon('donut_large')}</span><strong>%${winRate}</strong><small>Galibiyet</small></div>
-      <div class="stat tint tint-amber"><span class="dot amber">${icon('trophy')}</span><strong>${leagueFor(p.xp)}</strong><small>Mevcut lig</small></div>
+      <div class="stat"><span class="dot primary">${icon('local_fire_department')}</span><strong>${currentStreak()} Gün</strong><small>Seri${p.freezes ? ` · ${icon('shield', 'fill')}${p.freezes}` : ''}</small></div>
+      <div class="stat"><span class="dot mint">${icon('donut_large')}</span><strong>%${winRate}</strong><small>Galibiyet</small></div>
+      <div class="stat"><span class="dot amber">${icon('trophy')}</span><strong>${leagueFor(p.xp)}</strong><small>Mevcut lig</small></div>
     </section>
 
-    <button class="card tint tint-lilac badge-summary" data-go="#/skor">
-      <span class="dot" style="background:var(--tint-dot)">${icon('leaderboard', 'fill')}</span>
+    <button class="card badge-summary" data-go="#/skor">
+      <span class="dot lilac">${icon('leaderboard', 'fill')}</span>
       <div><strong>Skor Tablosu</strong><small>Günün kelimesinde diğer oyuncularla sıralaman</small></div>
       ${icon('chevron_right')}
     </button>
@@ -494,22 +494,22 @@ function renderHome() {
         <h2 id="modes-title">Diğer Modlar</h2>
       </div>
       <div class="modes">
-        <button class="mode tint tint-amber" data-classic="hard">
-          <div class="mode-top"><span class="mode-icon dot amber-ink">${icon('fitness_center')}</span><span class="badge tint-chip amber-ink">Zorlu</span></div>
+        <button class="mode" data-classic="hard">
+          <div class="mode-top"><span class="mode-icon dot amber">${icon('fitness_center')}</span><span class="badge">Zorlu</span></div>
           <h3>Zor Mod</h3>
           <p>${n} harfli kelime. Bulduğun harfleri sonraki tahminlerde kullanmak zorunlu.</p>
-          <span class="mode-cta amber-ink">Hemen Başla ${icon('arrow_forward')}</span>
+          <span class="mode-cta primary">Hemen Başla ${icon('arrow_forward')}</span>
         </button>
-        <button class="mode tint tint-rose" data-go="#/oyna/zaman">
-          <div class="mode-top"><span class="mode-icon dot rose-ink">${icon('timer')}</span><span class="badge tint-chip rose-ink">Turbo hız</span></div>
+        <button class="mode" data-go="#/oyna/zaman">
+          <div class="mode-top"><span class="mode-icon dot rose">${icon('timer')}</span><span class="badge">Turbo hız</span></div>
           <h3>Zamana Karşı</h3>
           <p>${TIME_ATTACK_SECONDS} saniyede ${n} harfli kelimelerden bildiğin kadar. En iyin: ${fmt(p.timeAttackBest)} puan.</p>
-          <span class="mode-cta rose-ink">Hemen Başla ${icon('arrow_forward')}</span>
+          <span class="mode-cta primary">Hemen Başla ${icon('arrow_forward')}</span>
         </button>
       </div>
     </section>
 
-    <section class="card tint tint-sage" aria-labelledby="quests-title" style="display:flex;flex-direction:column;gap:14px">
+    <section class="card" aria-labelledby="quests-title" style="display:flex;flex-direction:column;gap:14px">
       <div class="section-head">
         <h2 id="quests-title">${icon('task_alt')}Günlük Görevler</h2>
         <span class="muted small">Yenilenme: <span id="quest-reset">${hms(msUntilMidnight()).slice(0, 5)}</span></span>
@@ -1248,7 +1248,7 @@ function resultActions(primary) {
 function badgeCard(list = []) {
   if (!list.length) return '';
   return `
-    <section class="card tint tint-amber badge-card">
+    <section class="card badge-card">
       <span class="small" style="color:var(--present-ink)">${list.length > 1 ? `${list.length} YENİ ROZET` : 'YENİ ROZET'}</span>
       ${list.map((a) => `
         <div class="badge-line">
@@ -1444,12 +1444,12 @@ function renderStats() {
           </div>`).join('')}
       </div>` : `<p class="muted" style="margin:0">${tab} harfli kelimelerle henüz oyun oynamadın.</p>`}
     </section>
-    <button class="card tint tint-lilac badge-summary" data-go="#/skor">
-      <span class="dot" style="background:var(--tint-dot)">${icon('leaderboard', 'fill')}</span>
+    <button class="card badge-summary" data-go="#/skor">
+      <span class="dot lilac">${icon('leaderboard', 'fill')}</span>
       <div><strong>Skor Tablosu</strong><small>Bugün, bu hafta, bu ay ve tüm zamanlar</small></div>
       ${icon('chevron_right')}
     </button>
-    <button class="card tint tint-amber badge-summary" data-go="#/rozetler">
+    <button class="card badge-summary" data-go="#/rozetler">
       <span class="dot amber">${icon('workspace_premium', 'fill')}</span>
       <div><strong>Rozetler</strong><small>${unlocked} / ${ACHIEVEMENTS.length} açıldı</small></div>
       ${icon('chevron_right')}
@@ -1487,7 +1487,7 @@ async function renderLeaderboard() {
   const shell = (body) => `
   ${headerGame('Skor Tablosu')}
   <main class="page">
-    <section class="card tint tint-lilac" style="display:flex;flex-direction:column;gap:6px">
+    <section class="card" style="display:flex;flex-direction:column;gap:6px">
       <h2 style="font-size:20px">Günün Kelimesi sıralaması</h2>
       <p class="muted" style="margin:0">Herkes her gün aynı kelimeyi çözer. Puan erken, hızlı ve ipuçsuz bilince artar; haftalık, aylık ve tüm zamanlar listeleri günlük puanların toplamıdır.</p>
     </section>
@@ -1566,7 +1566,7 @@ function renderBadges() {
   app.innerHTML = `
   ${headerGame('Rozetler')}
   <main class="page">
-    <section class="card tint tint-amber" style="display:flex;align-items:center;gap:14px">
+    <section class="card" style="display:flex;align-items:center;gap:14px">
       <span class="dot amber" style="width:52px;height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center">${icon('workspace_premium', 'fill')}</span>
       <div><strong style="font-size:22px">${unlocked.length} / ${ACHIEVEMENTS.length}</strong><br><span class="muted">rozet açıldı. Her rozet coin ödülü verir.</span></div>
     </section>
@@ -1608,7 +1608,7 @@ function renderArchive() {
   app.innerHTML = `
   ${headerGame('Arşiv')}
   <main class="page">
-    <section class="card tint tint-sky" style="display:flex;flex-direction:column;gap:6px">
+    <section class="card" style="display:flex;flex-direction:column;gap:6px">
       <h2 style="font-size:20px">Geçmiş günlerin kelimeleri</h2>
       <p class="muted" style="margin:0">Kaçırdığın günlerin kelimelerini burada oynayabilirsin. Arşiv, bugünün kelimesini tamamlayınca açılır. Arşiv oyunları ödül ve istatistik kazandırır, ama seriyi etkilemez. Son ${days.length} günden ${done} tanesi tamamlandı.</p>
     </section>
