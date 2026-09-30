@@ -15,7 +15,7 @@ def signingValue = { String env, String prop -> System.getenv(env) ?: keystorePr
 def releaseStoreFile = signingValue('LINGO_KEYSTORE_FILE', 'storeFile')
 
 // Kullanıcıya görünen sürüm. CI çıktı dosyalarını da bu değerle adlandırır.
-def defaultVersionName = '1.54.03'
+def defaultVersionName = '1.54.04'
 
 android {
     namespace = "com.stitchilyas.lingo"
