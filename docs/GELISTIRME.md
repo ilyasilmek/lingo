@@ -99,7 +99,7 @@ Alternatif olarak `android/keystore.properties.example` dosyasını `android/key
 
 `server/` klasörü, Cloudflare Workers ve D1 (SQLite) üzerinde çalışan küçük bir sunucudur. Cloudflare'in ücretsiz planı yeterlidir.
 
-- `server/src/index.js`: istekleri karşılar. Uç noktalar: `POST /v1/oyuncu`, `POST /v1/skor`, `GET /v1/tablo?donem=gun|hafta|ay|tum`, `POST /v1/gizle` ve `POST /v1/sil` (yönetici).
+- `server/src/index.js`: istekleri karşılar. Uç noktalar: `POST /v1/oyuncu`, `POST /v1/skor`, `GET /v1/tablo?donem=gun|hafta|ay|tum`, `POST /v1/oyuncu/durum`, `POST /v1/gizle` ve `POST /v1/sil` (yönetici).
 - `server/migrations/`: veritabanı şeması.
 - `js/leaderboard-rules.js`: uygulamayla ortak kurallar. Sunucu, telefondan gelen puana güvenmez; günün kelimesini kendisi hesaplar, tahminleri doğrular ve puanı kendisi verir. Her oyuncu her gün için tek skor gönderebilir, tarih Türkiye saatine göre alınır.
 - Oyuncu adları benzersizdir. `nameKey()` adı karşılaştırma anahtarına çevirir (küçük harf, `ı/i`, `ş/s` gibi Türkçe harfler ve şapkalar sadeleşir, boşluk, nokta, tire ve alt çizgi atılır); `players.name_key` üzerinde tekil indeks vardır. Alınmış bir adla kayıt ya da ad değişikliği 409 döner, uygulama da oyuncudan başka bir ad ister. Uygulama adı skor tablosuna katılımdan bağımsız olarak ilk girişte ve her ad değişikliğinde `POST /v1/oyuncu` ile ayırır (skoru olmayan oyuncu tabloda görünmez). Çevrimdışı girilen ad `nameClaimed: false` olarak kalır; açılışta ve `online` olayında `syncName()` yeniden dener. `0003_benzersiz_ad.sql` taşıması eski çift kayıtlardan en çok oyunu olanı bırakır, diğerlerini anahtarsız bırakıp gizler; bu oyuncular yeni bir ad seçince yeniden görünür.
@@ -146,4 +146,4 @@ curl -X POST https://SUNUCU-ADRESİ/v1/sil \
   -d '{"id":"OYUNCU_KİMLİĞİ"}'
 ```
 
-Silinen oyuncu uygulamada skor tablosuna katılmaya devam ederse bir sonraki günlük skorla aynı cihaz kimliğiyle yeniden kaydolur. Talep sahibine Profil sayfasındaki "Skor tablosunda görün" ayarını kapatmasını söyle.
+Silme yalnızca sunucudaki verileri kaldırır; oyuncunun cihazındaki seri, istatistik ve geçmiş günler olduğu gibi kalır. Uygulama açılışta kaydını sorar (`POST /v1/oyuncu/durum`, kayıt oluşturmaz). Kayıt silinmişse oyuncuya "Oyuncu kaydın silindi" der, bekleyen skorları atar, skor tablosu katılımını yeniden sorulacak şekilde sıfırlar ve yeni bir ad seçmesini ister. Oyuncu ad seçmeden uygulama sunucuda yeniden kayıt açmaz.

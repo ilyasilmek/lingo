@@ -14,7 +14,7 @@ import {
   FREEZE_COST, FREEZE_MAX, REMINDER_TIMES, emptyLengthStats, archiveAccess, openArchiveDay,
 } from './progress.js';
 import { remindersSupported, requestReminderPermission, syncReminders } from './notifications.js';
-import { leaderboardReady, submitDaily, flushScores, claimName, syncName, fetchBoard } from './leaderboard.js';
+import { leaderboardReady, submitDaily, flushScores, claimName, syncName, checkPlayer, fetchBoard } from './leaderboard.js';
 import { PERIODS, PERIOD_LABELS } from './leaderboard-rules.js';
 import {
   getProfile, updateProfile, resetProfile, quests, currentStreak, recordRound, countGame,
@@ -212,6 +212,29 @@ async function ensureName() {
   updateProfile({ name, nameSet: true, nameChangedAt: p.gamesTotal });
   askingName = false;
   toast(`Merhaba ${name}!`);
+  render();
+}
+
+// Sunucudaki kayıt silindiyse oyuncuya söylenir ve yeni ad seçtirilir. Aynı ad boşsa yeniden alınabilir.
+// Cihazdaki veriler silinmez. Ad seçilmeden uygulama sessizce yeniden kayıt açmaz.
+async function askNameAfterDeletion() {
+  if (askingName || !getProfile().nameSet || !getProfile().playerDeleted) return;
+  askingName = true;
+  const name = await nameDialog({
+    title: 'Oyuncu kaydın silindi',
+    body: 'Sunucudaki oyuncu kaydın ve skor tablosundaki skorların silindi. Bu cihazdaki serin, istatistiklerin ve geçmiş günlerin duruyor. Devam etmek için bir ad seç; boştaysa aynı adı yeniden seçebilirsin.',
+    initial: getProfile().name,
+    confirmLabel: 'Devam',
+    required: true,
+    check: async (n) => {
+      const r = await claimName(n);
+      if (r.offline) return 'Sunucuya ulaşılamadı. İnternet bağlantını kontrol et.';
+      return r.ok ? null : r.error;
+    },
+  });
+  updateProfile({ name });
+  askingName = false;
+  toast(`Adın ${name} olarak kaydedildi`, 2600);
   render();
 }
 
@@ -1801,6 +1824,7 @@ async function verifyName() {
   if (verifyingName) return;
   verifyingName = true;
   try {
+    if (getProfile().playerDeleted || (await checkPlayer()) === 'deleted') return await askNameAfterDeletion();
     const problem = await syncName();
     if (!problem) return;
     if (await pickBoardName(getProfile().boardNameTaken ? null : problem)) await flushScores();
@@ -1812,8 +1836,10 @@ async function verifyName() {
 
 applyTheme(getProfile().theme);
 window.addEventListener('hashchange', render);
-window.addEventListener('online', verifyName);
+// Skorlar, kaydın silinip silinmediği öğrenildikten sonra gönderilir; yoksa silinen oyuncu
+// bekleyen bir skorla sessizce yeniden kaydolabilirdi.
+const verifyThenFlush = () => verifyName().finally(flushScores);
+window.addEventListener('online', verifyThenFlush);
 render();
 refreshReminders();
-verifyName();
-flushScores();
+verifyThenFlush();

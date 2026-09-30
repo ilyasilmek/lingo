@@ -73,7 +73,7 @@ export async function claimName(name) {
   const { id, secret } = identity();
   try {
     await call('/v1/oyuncu', { method: 'POST', body: JSON.stringify({ id, secret, name }) });
-    updateProfile({ nameClaimed: true, boardNameTaken: false });
+    updateProfile({ nameClaimed: true, boardNameTaken: false, playerDeleted: false });
     return { ok: true };
   } catch (e) {
     if (!e.status || e.status >= 500) return { ok: false, offline: true, error: 'Sunucuya ulaşılamadı. İnternet bağlantını kontrol et.' };
@@ -86,9 +86,26 @@ export async function claimName(name) {
 // Ad reddedilirse hata mesajı, ad zaten ayrılmışsa ya da bağlantı yoksa null döner.
 export async function syncName() {
   const p = getProfile();
-  if (!leaderboardReady() || !p.nameSet || (p.nameClaimed && !p.boardNameTaken)) return null;
+  if (!leaderboardReady() || !p.nameSet || p.playerDeleted || (p.nameClaimed && !p.boardNameTaken)) return null;
   const r = await claimName(p.name);
   return r.ok || r.offline ? null : r.error;
+}
+
+// Sunucudaki kaydın hâlâ durup durmadığını sorar; kayıt oluşturmaz.
+// Kayıt silinmişse cihazdaki kayıt bilgisi sıfırlanır, skor tablosu katılımı yeniden sorulur
+// ve bekleyen skorlar atılır. Cihazdaki seri, istatistik ve geçmiş günler olduğu gibi kalır.
+// Sonuç: 'exists' | 'deleted' | null (kayıt yok sayılmıyor ya da sunucuya ulaşılamadı)
+export async function checkPlayer() {
+  const p = getProfile();
+  if (!leaderboardReady() || !p.nameClaimed || !p.playerId || !p.playerSecret) return null;
+  try {
+    const r = await call('/v1/oyuncu/durum', { method: 'POST', body: JSON.stringify({ id: p.playerId, secret: p.playerSecret }) });
+    if (r.exists) return 'exists';
+  } catch {
+    return null;
+  }
+  updateProfile({ playerDeleted: true, nameClaimed: false, boardNameTaken: false, leaderboard: null, scoreQueue: [] });
+  return 'deleted';
 }
 
 export async function fetchBoard(period) {

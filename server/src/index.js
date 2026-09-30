@@ -105,6 +105,17 @@ async function upsertPlayer(request, env) {
   return json({ ok: true });
 }
 
+// POST /v1/oyuncu/durum  { id, secret } -> { exists }. Kayıt oluşturmaz.
+// Uygulama, sunucudaki kaydının yönetici tarafından silinip silinmediğini bununla öğrenir.
+async function playerStatus(request, env) {
+  const body = await readJson(request);
+  if (!body || !isPlayerId(body.id) || !isSecret(body.secret)) return fail('Geçersiz oyuncu kimliği', 401);
+  const row = await env.DB.prepare('SELECT secret_hash FROM players WHERE id = ?').bind(body.id).first();
+  if (!row) return json({ exists: false }, 200, { 'cache-control': 'no-store' });
+  if (row.secret_hash !== await sha256(body.secret)) return fail('Oyuncu doğrulanamadı', 401);
+  return json({ exists: true }, 200, { 'cache-control': 'no-store' });
+}
+
 // POST /v1/skor  { id, secret, name, day, guesses, hints, seconds }
 async function submitScore(request, env) {
   const body = await readJson(request);
@@ -261,6 +272,7 @@ export default {
       if (url.pathname === '/v1/tablo' && request.method === 'GET') return await leaderboard(url, env);
       if (url.pathname === '/v1/skor' && request.method === 'POST') return await submitScore(request, env);
       if (url.pathname === '/v1/oyuncu' && request.method === 'POST') return await upsertPlayer(request, env);
+      if (url.pathname === '/v1/oyuncu/durum' && request.method === 'POST') return await playerStatus(request, env);
       if (url.pathname === '/yonetim' && request.method === 'GET') return adminPage();
       if (url.pathname === '/v1/yonetim/giris' && request.method === 'GET') return await withAdmin(request, env, () => json({ ok: true }));
       if (url.pathname === '/v1/yonetim/oyuncular' && request.method === 'GET') return await withAdmin(request, env, () => adminPlayers(url, env));
