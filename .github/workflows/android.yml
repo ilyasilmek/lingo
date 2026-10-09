@@ -99,12 +99,20 @@ jobs:
           jarsigner -verify android/app/build/outputs/bundle/release/app-release.aab | tail -1
 
       - name: Çıktıları topla
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.LINGO_KEYSTORE_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD || secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.LINGO_KEY_ALIAS || secrets.ANDROID_KEY_ALIAS || secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.LINGO_KEY_PASSWORD || secrets.ANDROID_KEY_PASSWORD || secrets.KEY_PASSWORD || secrets.STORE_PASSWORD }}
         run: |
           mkdir -p dist
           cp android/app/build/outputs/apk/debug/app-debug.apk "dist/lingo-$LINGO_VERSION_NAME-debug.apk"
           if [ "$LINGO_SIGNED" = "true" ]; then SUFFIX=release; else SUFFIX=release-unsigned; fi
           cp android/app/build/outputs/apk/release/app-release*.apk "dist/lingo-$LINGO_VERSION_NAME-$SUFFIX.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab "dist/lingo-$LINGO_VERSION_NAME-$SUFFIX.aab"
+          if [ "$LINGO_SIGNED" = "true" ]; then
+            cp "$RUNNER_TEMP/lingo-upload.jks" dist/lingo-upload.jks
+            printf "storeFile=/Users/zeynepilyas/Desktop/Android Projeler/imzalar/lingo/lingo-upload.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n" "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "${KEY_PASSWORD:-$KEYSTORE_PASSWORD}" > dist/keystore.properties
+          fi
           (cd dist && sha256sum *.apk *.aab > SHA256SUMS.txt)
           ls -la dist
           {
