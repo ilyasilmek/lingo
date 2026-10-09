@@ -15,7 +15,7 @@ def signingValue = { String env, String prop -> System.getenv(env) ?: keystorePr
 def releaseStoreFile = signingValue('LINGO_KEYSTORE_FILE', 'storeFile')
 
 // Kullanıcıya görünen sürüm. CI çıktı dosyalarını da bu değerle adlandırır.
-def defaultVersionName = '1.54.04'
+def defaultVersionName = '1.54.05'
 
 android {
     namespace = "com.stitchilyas.lingo"
@@ -26,8 +26,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Play Store her yüklemede daha büyük bir sürüm kodu ister. 1.54.02 sürümü
         // 1540200 + derleme numarasıyla yayımlandı; CI 1540300 + derleme numarası verir.
-        // Android Studio'da yerel derleme 1540300 alır.
-        versionCode Integer.parseInt(System.getenv('LINGO_VERSION_CODE') ?: '1540300')
+        // Android Studio'da yerel derleme 1540500 alır.
+        versionCode Integer.parseInt(System.getenv('LINGO_VERSION_CODE') ?: '1540500')
         versionName defaultVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
