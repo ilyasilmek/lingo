@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  dailyAnswerFor, leaderboardPoints, checkDailySubmission, periodStart, publicNameProblem, isPlayerId, isSecret, nameKey,
+  dailyAnswerFor, leaderboardPoints, checkSubmission, checkDailySubmission, periodStart, publicNameProblem, isPlayerId, isSecret, nameKey,
 } from '../js/leaderboard-rules.js';
 import { seededShuffle, dailyIndex } from '../js/game.js';
 import { parseDay } from '../js/progress.js';
@@ -10,17 +10,19 @@ import { parseDay } from '../js/progress.js';
 const list = (n) => readFileSync(new URL(`../data/${n}.txt`, import.meta.url), 'utf8').split('\n').filter(Boolean);
 const answers = list('answers-5');
 const valid = new Set(list('valid-5'));
+const answers4 = list('answers-4');
+const valid4 = new Set(list('valid-4'));
 const today = '2026-09-29';
 const ans = dailyAnswerFor(answers, today);
 const wrong = [...valid].filter((w) => w[0] === ans[0] && w !== ans);
-const ctx = { answers, valid, today };
+const ctx = { answers, valid, today, answersByLen: { 5: answers, 4: answers4 }, validByLen: { 5: valid, 4: valid4 } };
 
 test('sunucunun günlük kelimesi uygulamanınkiyle aynı', () => {
   const order = seededShuffle(answers);
   assert.equal(ans, order[dailyIndex(order.length, parseDay(today))]);
 });
 
-test('puan: erken, hızlı ve ipuçsuz bilmek kazandırır', () => {
+test('puan: erken, hızlı ve ipuçsuz bilince artar', () => {
   assert.equal(leaderboardPoints({ won: false, attempts: 6, seconds: 90 }), 0);
   assert.ok(leaderboardPoints({ won: true, attempts: 2, seconds: 30 }) > leaderboardPoints({ won: true, attempts: 4, seconds: 30 }));
   assert.ok(leaderboardPoints({ won: true, attempts: 4, seconds: 30 }) > leaderboardPoints({ won: true, attempts: 4, seconds: 30, hints: 2 }));
@@ -37,9 +39,17 @@ test('geçerli gönderimler kabul edilir', () => {
   assert.equal(checkDailySubmission({ day: '2026-09-28', guesses: [dailyAnswerFor(answers, '2026-09-28')], seconds: 10 }, ctx).ok, true);
 });
 
+test('klasik mod gönderimleri kabul edilir (4-9 harf)', () => {
+  const target4 = answers4[0];
+  const win4 = checkSubmission({ day: today, mode: 'classic', length: 4, answer: target4, guesses: [target4], seconds: 15 }, ctx);
+  assert.equal(win4.ok, true);
+  assert.equal(win4.won, true);
+  assert.ok(win4.points > 0);
+});
+
 test('sahte gönderimler reddedilir', () => {
   const bad = (sub) => checkDailySubmission({ day: today, seconds: 60, ...sub }, ctx);
-  assert.equal(bad({ guesses: [ans], seconds: 1 }).ok, false);
+  assert.equal(bad({ guesses: [ans], seconds: 0.1 }).ok, false);
   assert.equal(bad({ guesses: [wrong[0]] }).ok, false);
   assert.equal(bad({ guesses: [ans, wrong[0]] }).ok, false);
   assert.equal(bad({ guesses: ['ZZZZZ'] }).ok, false);

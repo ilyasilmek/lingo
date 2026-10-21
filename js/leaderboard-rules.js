@@ -8,7 +8,7 @@ import { parseDay, daysBetween, addDays } from './progress.js';
 
 export const PERIODS = ['gun', 'hafta', 'ay', 'tum'];
 export const PERIOD_LABELS = { gun: 'Bugün', hafta: 'Bu hafta', ay: 'Bu ay', tum: 'Tüm zamanlar' };
-export const MIN_SECONDS_PER_GUESS = 3;
+export const MIN_SECONDS_PER_GUESS = 1.5;
 
 // Günün kelimesi: tarih ve cevap listesinden herkes için aynı kelime.
 export function dailyAnswerFor(answers, day) {
@@ -52,35 +52,54 @@ export function nameKey(raw) {
     .replace(/[\s._-]/g, '');
 }
 
-// Günlük oyun gönderimini doğrular. Geçerliyse { ok: true, won, attempts, points },
-// değilse { ok: false, error }.
-//   today: sunucunun bugünü ('YYYY-MM-DD'); bir gün önce ve sonrası da kabul edilir (saat dilimi farkı).
-export function checkDailySubmission({ day, guesses, hints = 0, seconds }, { answers, valid, today }) {
+// Herhangi bir oyun modunun (klasik, günlük, arşiv) gönderimini doğrular.
+export function checkSubmission({ day, mode = 'classic', length = 5, answer, guesses, hints = 0, seconds }, { answers, valid, answersByLen, validByLen, today }) {
   if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return { ok: false, error: 'Geçersiz tarih' };
   if (daysBetween(EPOCH_DAY, day) < 0) return { ok: false, error: 'Geçersiz tarih' };
-  const offset = daysBetween(today, day);
-  if (offset < -1 || offset > 1) return { ok: false, error: 'Skor yalnızca günün kelimesi için gönderilebilir' };
+
+  const len = Number(length) || (guesses?.[0] ? [...guesses[0]].length : 5);
+  if (len < 4 || len > 9) return { ok: false, error: 'Geçersiz kelime uzunluğu' };
+
+  const ansList = answersByLen?.[len] || answers || [];
+  const valSet = validByLen?.[len] || valid || new Set();
+
   if (!Array.isArray(guesses) || guesses.length < 1 || guesses.length > MAX_GUESSES) return { ok: false, error: 'Geçersiz tahmin sayısı' };
   if (!Number.isInteger(hints) || hints < 0 || hints > HINT_MAX) return { ok: false, error: 'Geçersiz ipucu sayısı' };
   if (!Number.isFinite(seconds) || seconds < 0 || seconds > 86400) return { ok: false, error: 'Geçersiz süre' };
 
-  const answer = dailyAnswerFor(answers, day);
-  const first = [...answer][0];
-  for (const g of guesses) {
-    if (typeof g !== 'string' || [...g].length !== DAILY_LENGTH || !valid.has(g)) return { ok: false, error: 'Geçersiz tahmin' };
-    if ([...g][0] !== first) return { ok: false, error: 'Geçersiz tahmin' };
+  let targetAnswer = answer;
+  if (mode === 'daily') {
+    const offset = daysBetween(today, day);
+    if (offset < -1 || offset > 1) return { ok: false, error: 'Skor yalnızca günün kelimesi için gönderilebilir' };
+    targetAnswer = dailyAnswerFor(ansList, day);
+    if (answer && answer !== targetAnswer) return { ok: false, error: 'Günün kelimesi eşleşmiyor' };
+  } else {
+    if (typeof targetAnswer !== 'string' || [...targetAnswer].length !== len) {
+      targetAnswer = guesses[guesses.length - 1]; // eğer tahminlerde varsa en sonuncu
+    }
   }
-  const hit = guesses.indexOf(answer);
+
+  const first = targetAnswer ? [...targetAnswer][0] : null;
+  for (const g of guesses) {
+    if (typeof g !== 'string' || [...g].length !== len) return { ok: false, error: 'Geçersiz tahmin' };
+    if (valSet.size > 0 && !valSet.has(g)) return { ok: false, error: 'Geçersiz tahmin' };
+    if (first && [...g][0] !== first) return { ok: false, error: 'Geçersiz tahmin' };
+  }
+
+  const hit = targetAnswer ? guesses.indexOf(targetAnswer) : -1;
   const won = hit !== -1;
   if (won && hit !== guesses.length - 1) return { ok: false, error: 'Kelime bulunduktan sonra tahmin yapılamaz' };
   if (!won && guesses.length < MAX_GUESSES) return { ok: false, error: 'Oyun bitmemiş' };
   if (hints > 0 && guesses.length <= HINT_AFTER_GUESSES) return { ok: false, error: 'İpucu kuralına uymuyor' };
   if (seconds < guesses.length * MIN_SECONDS_PER_GUESS) return { ok: false, error: 'Süre olanaksız derecede kısa' };
 
-  // Değerlendirme sunucuda da yapılır; sonuç yalnızca doğrulama içindir.
-  guesses.forEach((g) => evaluateGuess(g, answer));
   const attempts = guesses.length;
   return { ok: true, won, attempts, points: leaderboardPoints({ won, attempts, seconds, hints }) };
+}
+
+// Günlük oyun gönderimini doğrular (geriye dönük uyumluluk).
+export function checkDailySubmission({ day, guesses, hints = 0, seconds }, { answers, valid, today }) {
+  return checkSubmission({ day, mode: 'daily', length: 5, guesses, hints, seconds }, { answers, valid, today });
 }
 
 // Dönemin başladığı gün. 'tum' için null.

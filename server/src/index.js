@@ -1,15 +1,45 @@
 // Lingo skor tablosu sunucusu (Cloudflare Worker + D1).
-// Yalnızca Günün Kelimesi skorlarını kabul eder ve puanı kendisi hesaplar.
-import answersText from '../../data/answers-5.txt';
-import validText from '../../data/valid-5.txt';
+// Tüm oyun modlarındaki (günlük, klasik, arşiv) skorları kabul eder ve puanı kendisi hesaplar.
+import answers4Text from '../../data/answers-4.txt';
+import answers5Text from '../../data/answers-5.txt';
+import answers6Text from '../../data/answers-6.txt';
+import answers7Text from '../../data/answers-7.txt';
+import answers8Text from '../../data/answers-8.txt';
+import answers9Text from '../../data/answers-9.txt';
+
+import valid4Text from '../../data/valid-4.txt';
+import valid5Text from '../../data/valid-5.txt';
+import valid6Text from '../../data/valid-6.txt';
+import valid7Text from '../../data/valid-7.txt';
+import valid8Text from '../../data/valid-8.txt';
+import valid9Text from '../../data/valid-9.txt';
+
 import { cleanName } from '../../js/game.js';
 import { ADMIN_HTML } from './admin-page.js';
 import {
-  PERIODS, checkDailySubmission, periodStart, publicNameProblem, isPlayerId, isSecret, nameKey,
+  PERIODS, checkSubmission, checkDailySubmission, periodStart, publicNameProblem, isPlayerId, isSecret, nameKey,
 } from '../../js/leaderboard-rules.js';
 
-const ANSWERS = answersText.split('\n').filter(Boolean);
-const VALID = new Set(validText.split('\n').filter(Boolean));
+const ANSWERS_BY_LEN = {
+  4: answers4Text.split('\n').filter(Boolean),
+  5: answers5Text.split('\n').filter(Boolean),
+  6: answers6Text.split('\n').filter(Boolean),
+  7: answers7Text.split('\n').filter(Boolean),
+  8: answers8Text.split('\n').filter(Boolean),
+  9: answers9Text.split('\n').filter(Boolean),
+};
+
+const VALID_BY_LEN = {
+  4: new Set(valid4Text.split('\n').filter(Boolean)),
+  5: new Set(valid5Text.split('\n').filter(Boolean)),
+  6: new Set(valid6Text.split('\n').filter(Boolean)),
+  7: new Set(valid7Text.split('\n').filter(Boolean)),
+  8: new Set(valid8Text.split('\n').filter(Boolean)),
+  9: new Set(valid9Text.split('\n').filter(Boolean)),
+};
+
+const ANSWERS_5 = ANSWERS_BY_LEN[5];
+const VALID_5 = VALID_BY_LEN[5];
 const LIMIT = 50;
 
 const CORS = {
@@ -116,27 +146,41 @@ async function playerStatus(request, env) {
   return json({ exists: true }, 200, { 'cache-control': 'no-store' });
 }
 
-// POST /v1/skor  { id, secret, name, day, guesses, hints, seconds }
+// POST /v1/skor  { id, secret, name, day, mode, length, answer, guesses, hints, seconds, gameId }
 async function submitScore(request, env) {
   const body = await readJson(request);
   if (!body) return fail('Geçersiz istek');
   if (!isPlayerId(body.id) || !isSecret(body.secret)) return fail('Geçersiz oyuncu kimliği', 401);
+
   // Önce skor doğrulanır; geçersiz gönderim veritabanında oyuncu kaydı bile açmaz.
-  const check = checkDailySubmission(
-    { day: body.day, guesses: body.guesses, hints: body.hints ?? 0, seconds: Number(body.seconds) },
-    { answers: ANSWERS, valid: VALID, today: istanbulToday() },
+  const check = checkSubmission(
+    {
+      day: body.day,
+      mode: body.mode || 'classic',
+      length: body.length || 5,
+      answer: body.answer,
+      guesses: body.guesses,
+      hints: body.hints ?? 0,
+      seconds: Number(body.seconds),
+    },
+    { answers: ANSWERS_5, valid: VALID_5, answersByLen: ANSWERS_BY_LEN, validByLen: VALID_BY_LEN, today: istanbulToday() },
   );
   if (!check.ok) return fail(check.error, 422);
+
   const auth = await authPlayer(env, body, { create: true });
   if (auth.error) return fail(auth.error, auth.status);
   if (!auth.player.name_key) return fail(NAME_TAKEN, 409);
+
+  const gameId = body.gameId || `${body.id}_${body.day}_${Math.random().toString(36).slice(2, 10)}`;
+  const mode = body.mode || 'classic';
+
   const res = await env.DB.prepare(
-    'INSERT OR IGNORE INTO scores (player_id, day, won, attempts, seconds, hints, points) VALUES (?, ?, ?, ?, ?, ?, ?)',
-  ).bind(body.id, body.day, check.won ? 1 : 0, check.attempts, Math.round(body.seconds), body.hints ?? 0, check.points).run();
+    'INSERT OR IGNORE INTO scores (id, player_id, day, mode, won, attempts, seconds, hints, points) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+  ).bind(gameId, body.id, body.day, mode, check.won ? 1 : 0, check.attempts, Math.round(body.seconds), body.hints ?? 0, check.points).run();
+
   const duplicate = (res.meta?.changes ?? 0) === 0;
   if (duplicate) {
-    // Bu gün için skor zaten var; ilk gönderilen geçerlidir.
-    const prev = await env.DB.prepare('SELECT points FROM scores WHERE player_id = ? AND day = ?').bind(body.id, body.day).first();
+    const prev = await env.DB.prepare('SELECT points FROM scores WHERE id = ?').bind(gameId).first();
     return json({ ok: true, points: prev?.points ?? 0, duplicate: true });
   }
   return json({ ok: true, points: check.points, duplicate: false });

@@ -14,7 +14,7 @@ import {
   FREEZE_COST, FREEZE_MAX, REMINDER_TIMES, emptyLengthStats, archiveAccess, openArchiveDay,
 } from './progress.js';
 import { remindersSupported, requestReminderPermission, syncReminders } from './notifications.js';
-import { leaderboardReady, submitDaily, flushScores, claimName, syncName, checkPlayer, fetchBoard } from './leaderboard.js';
+import { leaderboardReady, submitDaily, submitGame, flushScores, claimName, syncName, checkPlayer, fetchBoard } from './leaderboard.js';
 import { PERIODS, PERIOD_LABELS } from './leaderboard-rules.js';
 import {
   getProfile, updateProfile, resetProfile, quests, currentStreak, recordRound, countGame,
@@ -1319,22 +1319,31 @@ function renderResult() {
   bindBack();
   bindCommon();
   if (r.won && !r.alreadyRecorded) confetti();
-  if (r.mode === 'daily' && !r.alreadyRecorded) offerLeaderboard(r);
+  if (!r.alreadyRecorded) offerLeaderboard(r);
 }
 
-// Günün kelimesi bitince skor tablosuna gönderir. Katılım varsayılan olarak açıktır;
+// Oyun bitince skor tablosuna gönderir. Katılım varsayılan olarak açıktır;
 // oyuncu ad girerken bilgilendirilir ve Profil'den kapatabilir.
 async function offerLeaderboard(r) {
   if (!leaderboardReady()) return;
-  const payload = { day: r.day, guesses: r.guesses, hints: r.hints, seconds: r.seconds };
   if (getProfile().leaderboard !== true) return;
-  let res = await submitDaily(payload);
+  const payload = {
+    gameId: `${r.day || dayKey()}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    day: r.day || dayKey(),
+    mode: r.mode || 'classic',
+    length: r.guesses?.[0] ? [...r.guesses[0]].length : 5,
+    answer: r.answer,
+    guesses: r.guesses,
+    hints: r.hints,
+    seconds: r.seconds,
+  };
+  let res = await submitGame(payload);
   if (!res && getProfile().boardNameTaken) {
     if (!(await pickBoardName())) return toast('Skorun, yeni bir ad seçene kadar sırada bekleyecek', 3000);
     res = await flushScores();
   }
-  if (res && !res.duplicate) toast(`Skor tablosuna eklendi: +${fmt(res.points)} puan`, 2600);
-  else if (!res) toast('Skor şimdi gönderilemedi, bağlantı gelince gönderilecek', 2600);
+  if (res && !res.duplicate && res.points > 0) toast(`Skor tablosuna eklendi: +${fmt(res.points)} puan`, 2600);
+  else if (!res) toast('Skor sıraya alındı, bağlantı gelince gönderilecek', 2600);
 }
 
 function renderTimeResult(r) {
@@ -1473,8 +1482,8 @@ async function renderLeaderboard() {
   ${headerGame('Skor Tablosu')}
   <main class="page">
     <section class="card" style="display:flex;flex-direction:column;gap:6px">
-      <h2 style="font-size:20px">Günün Kelimesi sıralaması</h2>
-      <p class="muted" style="margin:0">Herkes her gün aynı kelimeyi çözer. Puan erken, hızlı ve ipuçsuz bilince artar; haftalık, aylık ve tüm zamanlar listeleri günlük puanların toplamıdır.</p>
+      <h2 style="font-size:20px">Oyuncu sıralaması</h2>
+      <p class="muted" style="margin:0">Tamamladığın tüm kelimelerden kazandığın puanlar liderlik tablosuna eklenir. Puan erken, hızlı ve ipuçsuz bilince artar; günlük, haftalık, aylık ve tüm zamanlar listeleri toplam puanları gösterir.</p>
     </section>
     ${tabs}
     ${body}
@@ -1489,7 +1498,7 @@ async function renderLeaderboard() {
     }));
     app.querySelector('#join-board')?.addEventListener('click', async () => {
       if (await joinBoard()) {
-        toast('Skor tablosuna katıldın. Günün kelimesini çözünce listede görüneceksin.', 3200);
+        toast('Skor tablosuna katıldın. Oyunları tamamladıkça listede görüneceksin.', 3200);
         await flushScores();
       }
       render();
@@ -1516,8 +1525,8 @@ async function renderLeaderboard() {
   }
   if (token !== renderToken) return;
   const joinCard = p.leaderboard !== true ? `
-    <div class="archive-notice">${icon('leaderboard')}<div><strong>Sen listede değilsin</strong><small>Katılırsan günün kelimesi skorların <b>${esc(p.name)}</b> adıyla burada görünür.</small></div>
-      <button class="btn btn-primary" id="join-board">Katıl</button></div>` : '';
+    <div class="archive-notice">${icon('leaderboard')}<div><strong>Sen listede değilsin</strong><small>Katılırsan oyun skorların <b>${esc(p.name)}</b> adıyla burada görünür.</small></div>
+      <button class="btn btn-primary" id="join-board">Katıl</button></div>` : '';;
   const meInTop = data.entries.some((e) => e.self);
   const meCard = data.me && !meInTop ? `
     <div class="board-row self"><span class="board-rank">${data.me.rank}</span><span class="board-name">${esc(p.name)} (sen)</span><span class="board-games">${data.me.games} oyun</span><span class="board-points">${fmt(data.me.points)}</span></div>` : '';
@@ -1667,7 +1676,7 @@ function renderProfile() {
       <h2 style="font-size:18px">Ayarlar</h2>
       ${toggle('sound-toggle', 'Oyun sesleri', 'Tuş, kazanma ve kaybetme sesleri', p.sound)}
       ${toggle('haptics-toggle', 'Titreşim', 'Harflere basınca hafif titreşim', p.haptics)}
-      ${toggle('board-toggle', 'Skor tablosunda görün', leaderboardReady() ? 'Günün kelimesi skorların adınla birlikte paylaşılır. Kapatırsan yeni skorların gönderilmez.' : 'Skor tablosu henüz hazır değil.', p.leaderboard === true && leaderboardReady(), !leaderboardReady())}
+      ${toggle('board-toggle', 'Skor tablosunda görün', leaderboardReady() ? 'Oyun skorların adınla birlikte paylaşılır. Kapatırsan yeni skorların gönderilmez.' : 'Skor tablosu henüz hazır değil.', p.leaderboard === true && leaderboardReady(), !leaderboardReady())}
       ${toggle('hard-toggle', 'Zor mod', 'Bulunan harfleri sonraki tahminlerde kullanmak zorunlu. Yeni oyunlardan itibaren geçerli.', p.hardMode)}
       ${toggle('reminder-toggle', 'Günlük hatırlatma', canRemind ? 'Günün kelimesini çözmediysen seçtiğin saatte bildirim gelir.' : 'Yalnızca Android uygulamasında çalışır.', p.reminder && canRemind, !canRemind)}
       ${canRemind && p.reminder ? `

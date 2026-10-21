@@ -1,4 +1,4 @@
-// Skor tablosu istemcisi. Yalnızca Günün Kelimesi sonuçları, oyuncu izin verdiyse gönderilir.
+// Skor tablosu istemcisi. Tüm oyun sonuçları (günlük, klasik, arşiv), oyuncu izin verdiyse gönderilir.
 // İnternet yoksa gönderim sıraya alınır ve uygulama bir sonraki açılışta yeniden dener.
 import { LEADERBOARD_URL } from './config.js';
 import { getProfile, updateProfile } from './storage.js';
@@ -35,21 +35,28 @@ async function call(path, options = {}) {
   return data;
 }
 
-// Bitmiş günlük oyunu sıraya ekler ve göndermeyi dener.
-export async function submitDaily({ day, guesses, hints, seconds }) {
+// Bitmiş herhangi bir oyunu (günlük, klasik, arşiv) sıraya ekler ve göndermeyi dener.
+export async function submitGame({ gameId, day, mode = 'classic', length = 5, answer, guesses, hints = 0, seconds }) {
   if (!leaderboardReady() || getProfile().leaderboard !== true) return null;
-  const queue = (getProfile().scoreQueue || []).filter((q) => q.day !== day);
-  updateProfile({ scoreQueue: [...queue, { day, guesses, hints, seconds }] });
+  const gid = gameId || `${day}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const item = { gameId: gid, day, mode, length, answer, guesses, hints, seconds };
+  const queue = (getProfile().scoreQueue || []).filter((q) => (q.gameId || q.day) !== gid);
+  updateProfile({ scoreQueue: [...queue, item] });
   return flushScores();
 }
 
+export function submitDaily(payload) {
+  return submitGame({ ...payload, mode: 'daily', length: 5 });
+}
+
 // Sıradaki skorları gönderir. Sunucu reddederse (geçersiz skor) o kayıt atılır,
-// bağlantı hatasında sırada kalır. Son gönderilen günün puanını döndürür.
+// bağlantı hatasında sırada kalır. Son gönderilen oyunun puanını döndürür.
 export async function flushScores() {
   if (!leaderboardReady() || getProfile().leaderboard !== true) return null;
   const { id, secret } = identity();
   let last = null;
   for (const item of [...(getProfile().scoreQueue || [])]) {
+    const gid = item.gameId || item.day;
     try {
       last = await call('/v1/skor', { method: 'POST', body: JSON.stringify({ id, secret, name: getProfile().name, ...item }) });
     } catch (e) {
@@ -60,7 +67,7 @@ export async function flushScores() {
         break;
       }
     }
-    updateProfile({ scoreQueue: (getProfile().scoreQueue || []).filter((q) => q.day !== item.day) });
+    updateProfile({ scoreQueue: (getProfile().scoreQueue || []).filter((q) => (q.gameId || q.day) !== gid) });
   }
   return last;
 }
