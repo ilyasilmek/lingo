@@ -1708,7 +1708,7 @@ function renderProfile() {
         <li>Seri koruyucu, kaçırdığın bir günü kendiliğinden kapatır. En fazla ${FREEZE_MAX} tane taşıyabilirsin.</li>
         <li>Zor modda yeşil harfler yerinde kalmalı, turuncu harfler tahminde kullanılmalı.</li>
       </ul>
-      <div style="text-align:center;font-size:12px;color:rgba(239, 68, 68, 0.65);margin-top:2px">v1.54.05</div>
+      <div style="text-align:center;font-size:12px;color:rgba(239, 68, 68, 0.65);margin-top:2px">v1.54.06</div>
     </section>
     <button class="btn btn-ghost" id="reset" style="color:var(--danger)">${icon('delete')}Tüm verileri sıfırla</button>
   </main>
